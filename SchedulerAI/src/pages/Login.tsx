@@ -91,13 +91,13 @@ const Login = () => {
     <div
       className="
         min-h-dvh flex flex-col items-center justify-center
-        bg-background-color
+        bg-dark-background
         p-4 sm:p-6
       "
     >
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground-color">
+          <h1 className="text-3xl font-bold text-dark-foreground-color">
             AI Shift Scheduler
           </h1>
           <p className="text-muted-foreground mt-2">

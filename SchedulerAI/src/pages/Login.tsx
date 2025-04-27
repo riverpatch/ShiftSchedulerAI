@@ -17,7 +17,9 @@ import { useAuth } from "../context/AuthContext";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"Owner" | "Employee">("Employee");
+  const [role, setRole] = useState<"Owner" | "Employee">(
+    "Employee"
+  );
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -43,7 +45,9 @@ const Login = () => {
       const user = await login(email, password, role);
       toast.success("Logged in successfully!");
       navigate(
-        user.role === "Owner" ? "/owner/dashboard" : "/employee/dashboard"
+        user.role === "Owner"
+          ? "/owner/dashboard"
+          : "/employee/dashboard"
       );
     } catch (error) {
       toast.error("Invalid credentials");
@@ -64,10 +68,16 @@ const Login = () => {
     setTimeout(async () => {
       setIsLoading(true);
       try {
-        const user = await login(demoEmail, "password123", demoRole);
+        const user = await login(
+          demoEmail,
+          "password123",
+          demoRole
+        );
         toast.success("Logged in successfully!");
         navigate(
-          user.role === "Owner" ? "/owner/dashboard" : "/employee/dashboard"
+          user.role === "Owner"
+            ? "/owner/dashboard"
+            : "/employee/dashboard"
         );
       } catch {
         toast.error("Demo login failed");
@@ -80,14 +90,14 @@ const Login = () => {
   return (
     <div
       className="
-        min-h-screen flex flex-col items-center justify-center
-        bg-gradient-to-br from-scheduler-light via-white to-accent
+        min-h-dvh flex flex-col items-center justify-center
+        bg-background-color
         p-4 sm:p-6
       "
     >
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-scheduler-primary">
+          <h1 className="text-3xl font-bold text-foreground-color">
             AI Shift Scheduler
           </h1>
           <p className="text-muted-foreground mt-2">
@@ -97,10 +107,16 @@ const Login = () => {
 
         {/* card background from CSS var */}
         <div className="bg-card rounded-lg shadow-lg p-6 sm:p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5"
+          >
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center">
+              <Label
+                htmlFor="email"
+                className="flex items-center"
+              >
                 <Mail className="w-4 h-4 mr-2" />
                 Email
               </Label>
@@ -117,7 +133,10 @@ const Login = () => {
 
             {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="flex items-center">
+              <Label
+                htmlFor="password"
+                className="flex items-center"
+              >
                 <Lock className="w-4 h-4 mr-2" />
                 Password
               </Label>
@@ -126,7 +145,9 @@ const Login = () => {
                 type="password"
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
                 required
                 className="h-11"
               />
@@ -134,7 +155,10 @@ const Login = () => {
 
             {/* Role */}
             <div className="space-y-2">
-              <Label htmlFor="role" className="flex items-center">
+              <Label
+                htmlFor="role"
+                className="flex items-center"
+              >
                 <User className="w-4 h-4 mr-2" />
                 Role
               </Label>
@@ -148,8 +172,12 @@ const Login = () => {
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Employee">Employee</SelectItem>
-                  <SelectItem value="Owner">Owner</SelectItem>
+                  <SelectItem value="Employee">
+                    Employee
+                  </SelectItem>
+                  <SelectItem value="Owner">
+                    Owner
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -171,7 +199,9 @@ const Login = () => {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <CustomButton
-                onClick={() => demoLogin("owner@example.com", "Owner")}
+                onClick={() =>
+                  demoLogin("owner@example.com", "Owner")
+                }
                 variant="secondary"
                 className="w-full"
                 disabled={isLoading}
@@ -179,7 +209,12 @@ const Login = () => {
                 Login as Owner
               </CustomButton>
               <CustomButton
-                onClick={() => demoLogin("employee@example.com", "Employee")}
+                onClick={() =>
+                  demoLogin(
+                    "employee@example.com",
+                    "Employee"
+                  )
+                }
                 variant="outline"
                 className="w-full"
                 disabled={isLoading}
@@ -197,8 +232,13 @@ const Login = () => {
               Forgot Password?
             </a>
             <p className="mt-2 text-sm">
-              <span className="text-muted-foreground">Need an account? </span>
-              <a href="#" className="text-scheduler-primary hover:underline">
+              <span className="text-muted-foreground">
+                Need an account?{" "}
+              </span>
+              <a
+                href="#"
+                className="text-scheduler-primary hover:underline"
+              >
                 Sign Up
               </a>
             </p>

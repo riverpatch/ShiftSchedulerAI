@@ -1,49 +1,91 @@
-/* src/index.css — zero-config Tailwind v4 + complete theme/utilities */
-
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
 @import "tailwindcss";
+@source "./src/**/*.{html,js,jsx,ts,tsx}";
 
-/* 1) CSS-variable definitions (light + dark) */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
+@import "tailwindcss";
+@source "./src/**/*.{html,js,jsx,ts,tsx}";
+
+@theme {
+  --font-heading: "Montserrat", sans-serif;
+  --font-display: "Rubik", sans-serif;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-display);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+@layer base {
+  html {
+    overflow-y: scroll;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-light-background) #261e67;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+}
+
 @layer base {
   :root {
-    /* Core HSL palette */
-    --background: 260 46% 98%;
-    --foreground: 260 10% 10%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 255 80% 75%;
+    /* Core HEX palette for Light Mode */
+    --background: #ffffff; /* Pure White background */
+    --foreground: #0a0a23; /* Deep dark text (almost black navy) */
 
-    /* Semantic colors */
-    --primary: 255 80% 75%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 265 24% 54%;
-    --secondary-foreground: 210 40% 98%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 260 46% 90%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --border: #cbd5e1; /* Light border */
+    --input: #e2e8f0; /* Light input background */
+    --ring: #ef476f; /* Pink accent ring */
+
+    /* Semantic Colors */
+    --primary: #261e67; /* Deep primary text */
+    --primary-foreground: #ffffff; /* On dark buttons */
+
+    --secondary: #f1f5f9; /* Soft light gray background */
+    --secondary-foreground: #0a0a23;
+
+    --destructive: #ef4444; /* Red for destructive */
+    --destructive-foreground: #ffffff;
+
+    --muted: #f8fafc; /* Very soft muted background */
+    --muted-foreground: #6b7280; /* Medium gray text */
+
+    --accent: #ef476f; /* Vibrant pink accent */
+    --accent-foreground: #ffffff; /* Text on pink accent */
+
+    --popover: #f8fafc;
+    --popover-foreground: #0a0a23;
+
+    --card: #ffffff;
+    --card-foreground: #0a0a23;
 
     /* Sidebar */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 255 80% 75%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 255 80% 75%;
+    --sidebar-background: #f1f5f9;
+    --sidebar-foreground: #0a0a23;
+    --sidebar-primary: #261e67;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #e6f2f9;
+    --sidebar-accent-foreground: #0a0a23;
+    --sidebar-border: #cbd5e1;
+    --sidebar-ring: #ef476f;
 
-    /* Scheduler HEX palette */
-    --scheduler-primary: #9b87f5;
-    --scheduler-secondary: #7e69ab;
-    --scheduler-tertiary: #6e59a5;
-    --scheduler-dark: #1a1f2c;
-    --scheduler-light: #d6bcfa;
+    /* Scheduler Palette */
+    --scheduler-primary: #c0bcf5; /* Light Purple */
+    --scheduler-secondary: #6f7d7f; /* Secondary text gray */
+    --scheduler-tertiary: #261e67; /* Primary text dark */
+    --scheduler-dark: #0a0a23; /* Dark text for light backgrounds */
+    --scheduler-light: #e6f2f9; /* Light blue background */
     --scheduler-success: #22c55e;
     --scheduler-warning: #f97316;
     --scheduler-danger: #ef4444;
@@ -54,192 +96,232 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    /* other vars inherit */
+    /* Fallback if theme switching later */
+    --background: #001140;
+    --foreground: #defafe;
+    --border: #1e2850;
+    --input: #1e2850;
+    --ring: #ef476f;
   }
 
-  /* Page-level defaults */
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: var(--background);
+    color: var(--foreground);
   }
 }
 
-/* 2) Utilities layer: map all your config-extended values into classes */
 @layer utilities {
-  /* Container (center + 2rem padding, max-width 1400px at 2xl) */
+  /* Container */
   .container {
     margin-left: auto;
     margin-right: auto;
     padding-left: 2rem;
     padding-right: 2rem;
   }
+
   @media (min-width: 1536px) {
     .container {
       max-width: 1400px;
     }
   }
 
-  /* Backgrounds & text for CSS vars */
+  /* Backgrounds & text */
   .bg-background {
-    background-color: hsl(var(--background));
+    background-color: var(--background);
   }
+
   .text-foreground {
-    color: hsl(var(--foreground));
+    color: var(--foreground);
   }
+
   .bg-input {
-    background-color: hsl(var(--input));
+    background-color: var(--input);
   }
+
   .ring-ring {
-    --tw-ring-color: hsl(var(--ring));
+    --tw-ring-color: var(--ring);
   }
 
   /* Semantic */
   .bg-primary {
-    background-color: hsl(var(--primary));
+    background-color: var(--primary);
   }
+
   .text-primary-foreground {
-    color: hsl(var(--primary-foreground));
+    color: var(--primary-foreground);
   }
+
   .bg-secondary {
-    background-color: hsl(var(--secondary));
+    background-color: var(--secondary);
   }
+
   .text-secondary-foreground {
-    color: hsl(var(--secondary-foreground));
+    color: var(--secondary-foreground);
   }
+
   .bg-destructive {
-    background-color: hsl(var(--destructive));
+    background-color: var(--destructive);
   }
+
   .text-destructive-foreground {
-    color: hsl(var(--destructive-foreground));
+    color: var(--destructive-foreground);
   }
+
   .bg-muted {
-    background-color: hsl(var(--muted));
+    background-color: var(--muted);
   }
+
   .text-muted-foreground {
-    color: hsl(var(--muted-foreground));
+    color: var(--muted-foreground);
   }
+
   .bg-accent {
-    background-color: hsl(var(--accent));
+    background-color: var(--accent);
   }
+
   .text-accent-foreground {
-    color: hsl(var(--accent-foreground));
+    color: var(--accent-foreground);
   }
 
   /* Popover & Card */
   .bg-popover {
-    background-color: hsl(var(--popover));
+    background-color: var(--popover);
   }
+
   .text-popover-foreground {
-    color: hsl(var(--popover-foreground));
+    color: var(--popover-foreground);
   }
+
   .bg-card {
-    background-color: hsl(var(--card));
+    background-color: var(--card);
   }
+
   .text-card-foreground {
-    color: hsl(var(--card-foreground));
+    color: var(--card-foreground);
   }
 
   /* Sidebar */
   .bg-sidebar {
-    background-color: hsl(var(--sidebar-background));
-  }
-  .text-sidebar-foreground {
-    color: hsl(var(--sidebar-foreground));
-  }
-  .bg-sidebar-primary {
-    background-color: hsl(var(--sidebar-primary));
-  }
-  .text-sidebar-primary-foreground {
-    color: hsl(var(--sidebar-primary-foreground));
-  }
-  .bg-sidebar-accent {
-    background-color: hsl(var(--sidebar-accent));
-  }
-  .text-sidebar-accent-foreground {
-    color: hsl(var(--sidebar-accent-foreground));
-  }
-  .border-sidebar-border {
-    border-color: hsl(var(--sidebar-border));
-  }
-  .ring-sidebar-ring {
-    --tw-ring-color: hsl(var(--sidebar-ring));
+    background-color: var(--sidebar-background);
   }
 
-  /* Border & ring */
+  .text-sidebar-foreground {
+    color: var(--sidebar-foreground);
+  }
+
+  .bg-sidebar-primary {
+    background-color: var(--sidebar-primary);
+  }
+
+  .text-sidebar-primary-foreground {
+    color: var(--sidebar-primary-foreground);
+  }
+
+  .bg-sidebar-accent {
+    background-color: var(--sidebar-accent);
+  }
+
+  .text-sidebar-accent-foreground {
+    color: var(--sidebar-accent-foreground);
+  }
+
+  .border-sidebar-border {
+    border-color: var(--sidebar-border);
+  }
+
+  .ring-sidebar-ring {
+    --tw-ring-color: var(--sidebar-ring);
+  }
+
+  /* Border */
   .border-border {
-    border-color: hsl(var(--border));
+    border-color: var(--border);
   }
 
   /* Gradient stops */
   .from-scheduler-light {
-    --tw-gradient-from: hsl(var(--scheduler-light));
-  }
-  .via-white {
-    --tw-gradient-stops: var(--tw-gradient-from), white, var(--tw-gradient-to);
-  }
-  .to-accent {
-    --tw-gradient-to: hsl(var(--accent));
+    --tw-gradient-from: var(--scheduler-light);
   }
 
-  /* Scheduler text */
+  .via-white {
+    --tw-gradient-stops: var(--tw-gradient-from), white,
+      var(--tw-gradient-to);
+  }
+
+  .to-accent {
+    --tw-gradient-to: var(--accent);
+  }
+
+  /* Scheduler Text Colors */
   .text-scheduler-primary {
     color: var(--scheduler-primary);
   }
+
   .text-scheduler-secondary {
     color: var(--scheduler-secondary);
   }
+
   .text-scheduler-tertiary {
     color: var(--scheduler-tertiary);
   }
+
   .text-scheduler-dark {
     color: var(--scheduler-dark);
   }
+
   .text-scheduler-light {
     color: var(--scheduler-light);
   }
+
   .text-success {
     color: var(--scheduler-success);
   }
+
   .text-warning {
     color: var(--scheduler-warning);
   }
+
   .text-danger {
     color: var(--scheduler-danger);
   }
+
   .text-info {
     color: var(--scheduler-info);
   }
 
-  /* Scheduler backgrounds */
+  /* Scheduler Backgrounds */
   .bg-scheduler-primary {
     background-color: var(--scheduler-primary);
   }
+
   .bg-scheduler-secondary {
     background-color: var(--scheduler-secondary);
   }
+
   .bg-scheduler-tertiary {
     background-color: var(--scheduler-tertiary);
   }
+
   .bg-scheduler-dark {
     background-color: var(--scheduler-dark);
   }
+
   .bg-scheduler-light {
     background-color: var(--scheduler-light);
   }
+
   .bg-success {
     background-color: var(--scheduler-success);
   }
+
   .bg-warning {
     background-color: var(--scheduler-warning);
   }
+
   .bg-danger {
     background-color: var(--scheduler-danger);
   }
+
   .bg-info {
     background-color: var(--scheduler-info);
   }
@@ -248,9 +330,11 @@
   .rounded-lg {
     border-radius: var(--radius);
   }
+
   .rounded-md {
     border-radius: calc(var(--radius) - 2px);
   }
+
   .rounded-sm {
     border-radius: calc(var(--radius) - 4px);
   }
@@ -264,6 +348,7 @@
       height: var(--radix-accordion-content-height);
     }
   }
+
   @keyframes accordion-up {
     from {
       height: var(--radix-accordion-content-height);
@@ -272,6 +357,7 @@
       height: 0;
     }
   }
+
   @keyframes pulse-light {
     0%,
     100% {
@@ -286,29 +372,44 @@
   .animate-accordion-down {
     animation: accordion-down 0.2s ease-out;
   }
+
   .animate-accordion-up {
     animation: accordion-up 0.2s ease-out;
   }
+
   .animate-pulse-light {
-    animation: pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1)
+      infinite;
   }
 }
-
-/* 3) Components layer (your @apply utilities remain) */
 @layer components {
+  /* Hoverable card */
   .card-hover {
     @apply transition-all duration-200 hover:shadow-md hover:scale-[1.01] cursor-pointer;
   }
+
+  /* Status Badges */
   .status-badge-approved {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800;
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+    background-color: #d1fae5; /* Light green background */
+    color: #065f46; /* Dark green text */
   }
+
   .status-badge-pending {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800;
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+    background-color: #fef9c3; /* Light yellow background */
+    color: #92400e; /* Dark yellow text */
   }
+
   .status-badge-rejected {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800;
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+    background-color: #fee2e2; /* Light red background */
+    color: #991b1b; /* Dark red text */
   }
+
   .status-badge-emergency {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 animate-pulse;
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium animate-pulse;
+    background-color: #fee2e2; /* Light red background */
+    color: #991b1b; /* Dark red text */
   }
 }

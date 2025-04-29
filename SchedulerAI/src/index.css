@@ -1,7 +1,108 @@
 /* Your Google Fonts import comes FIRST */
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
-
 @import "tailwindcss";
+@theme {
+  --font-heading: "Montserrat", sans-serif;
+  --font-display: "Rubik", sans-serif;
+
+  /* Fallback if theme switching later */
+  /* --background: #001140;
+   --foreground: #defafe;
+   --border: #1e2850;
+   --input: #1e2850;
+   --ring: #ef476f; */
+
+  --color-background: #f2fdff;
+  --color-dark-background: #001140;
+  --color-foreground: #001140;
+  --color-dark-foreground: #f2fdff;
+
+  --color-border: #cbd5e1;
+  --color-input: #e2e8f0;
+  --color-ring: #ef476f;
+
+  /* Semantic Colors */
+  --color-primary: #261e67;
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #0a0a23;
+
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
+  --color-muted: #f8fafc;
+  --color-muted-foreground: #6b7280;
+
+  --color-accent: #ef476f;
+  --color-accent-foreground: #ffffff;
+
+  /* PopOver and Card Colors */
+  --color-popover: #f8fafc;
+  --color-popover-foreground: #0a0a23;
+
+  --color-card: #ffffff;
+  --color-card-foreground: #0a0a23;
+
+  /* Sidebar */
+  --color-sidebar: #f1f5f9; /* Potentially sidebar-background */
+  --color-sidebar-foreground: #0a0a23;
+  --color-sidebar-primary: #261e67;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: #e6f2f9;
+  --color-sidebar-accent-foreground: #0a0a23;
+  --color-sidebar-border: #cbd5e1;
+  --color-sidebar-ring: #ef476f;
+
+  /* Scheduler Palette */
+  --color-scheduler-primary: #001140;
+  --color-scheduler-secondary: #6f7d7f;
+  --color-scheduler-tertiary: #261e67;
+  --color-scheduler-dark: #0a0a23;
+  --color-scheduler-light: #e6f2f9;
+  --color-scheduler-success: #22c55e;
+  --color-scheduler-warning: #f97316;
+  --color-scheduler-danger: #ef4444;
+  --color-scheduler-info: #0ea5e9;
+
+  /* Border radius */
+  --radius: 0.5rem;
+
+  /* Animations and Keyframes */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-pulse-light: pulse-light 2s
+    cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  @keyframes pulse-light {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+}
+
 
 /* Custom base layer */
 @layer base {
@@ -38,6 +139,87 @@
 }
 
 /* Components like hover cards and badges */
+
+}
+
+@layer utilities {
+  /* Container */
+  .container {
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  @media (min-width: 1536px) {
+    .container {
+      max-width: 1400px;
+    }
+  }
+
+  /* Backgrounds & text */
+
+  .ring-ring {
+    --tw-ring-color: var(--ring);
+  }
+
+  /* Sidebar */
+
+  .ring-sidebar-ring {
+    --tw-ring-color: var(--sidebar-ring);
+  }
+
+  /* Border */
+  .border-border {
+    border-color: var(--border);
+  }
+
+  /* Gradient stops */
+  .from-scheduler-light {
+    --tw-gradient-from: var(--scheduler-light);
+  }
+
+  .via-white {
+    --tw-gradient-stops: var(--tw-gradient-from), white,
+      var(--tw-gradient-to);
+  }
+
+  .to-accent {
+    --tw-gradient-to: var(--accent);
+  }
+
+  /* Scheduler Backgrounds */
+
+  .bg-success {
+    background-color: var(--scheduler-success);
+  }
+
+  .bg-warning {
+    background-color: var(--scheduler-warning);
+  }
+
+  .bg-danger {
+    background-color: var(--scheduler-danger);
+  }
+
+  .bg-info {
+    background-color: var(--scheduler-info);
+  }
+
+  /* Border-radius */
+  .rounded-lg {
+    border-radius: var(--radius);
+  }
+
+  .rounded-md {
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  .rounded-sm {
+    border-radius: calc(var(--radius) - 4px);
+  }
+}
+
 @layer components {
   .card-hover {
     @apply transition-all duration-200 hover:shadow-md hover:scale-105 cursor-pointer;

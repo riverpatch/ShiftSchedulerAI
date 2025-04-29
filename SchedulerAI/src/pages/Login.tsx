@@ -79,11 +79,23 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center bg-[#f2fdff] p-4 sm:p-6">
+
+    <div
+      className="
+        min-h-dvh flex flex-col items-center justify-center
+        bg-dark-background
+        p-4 sm:p-6
+      "
+    >
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#001140]">AI Shift Scheduler</h1>
-          <p className="text-[#6f7d7f] mt-2">Log in to manage your schedules</p>
+          <h1 className="text-3xl font-bold text-dark-foreground-color">
+            AI Shift Scheduler
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Log in to manage your schedules
+          </p>
+
         </div>
 
         <div className="bg-[#f2fdff] rounded-lg shadow-lg p-6 sm:p-8 border border-[#261e67]">

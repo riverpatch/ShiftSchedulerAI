@@ -1,15 +1,15 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Database } from '@/integrations/supabase/types';
 
-// Type definitions matching Supabase schema
+// Type definitions matching new users schema
 export type User = {
-  id: string;
-  name: string;
+  user_id: number;
   email: string;
-  role: 'Owner' | 'Employee';
-  priority: number;
-  avatarUrl?: string;
+  password_hash?: string;
+  role: string;
+  name: string;
+  priority_level: number;
+  status?: string;
 };
 
 // Original camelCase version (for internal use)
@@ -26,156 +26,139 @@ export type LeaveOriginal = {
 
 // Snake_case version to match what LeaveRequestList component expects
 export type Leave = {
-  id: string;
-  employee_id: string;
-  start_date: string;
-  end_date: string;
-  type: 'Vacation' | 'Sick' | 'Personal' | 'Emergency';
-  status: 'Pending' | 'Approved' | 'Rejected';
-  reason: string;
-  submitted_at: string;
+  leave_id: number;
+  user_id: number;
+  leave_type: 'Full Day' | 'Half Day' | 'Hourly';
+  start_datetime: string;
+  end_datetime: string;
+  reason?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  approver_id?: number;
+  request_timestamp?: string;
 };
 
+// Update Shift type to match new schema
 export type Shift = {
-  id: string;
+  shift_id: number;
+  user_id: number;
   date: string;
-  startTime: string;
-  endTime: string;
-  employeeIds: string[];
-  position: string;
-  status: 'Scheduled' | 'In Progress' | 'Completed' | 'Unassigned';
+  shift_start_time: string;
+  shift_end_time: string;
+  assignment_type: 'manual' | 'ai-generated';
+  shift_status: 'assigned' | 'swapped' | 'emergency';
 };
 
 // Mock data for when not connected to Supabase
 export const users: User[] = [
   {
-    id: '1',
-    name: 'John Doe',
+    user_id: 1,
     email: 'owner@example.com',
+    password_hash: 'hashed_pw_1',
     role: 'Owner',
-    priority: 5
+    name: 'John Doe',
+    priority_level: 1,
+    status: 'active'
   },
   {
-    id: '2',
+    user_id: 2,
+    email: 'employee1@example.com',
+    password_hash: 'hashed_pw_2',
+    role: 'Employee',
     name: 'Jane Smith',
-    email: 'employee@example.com',
-    role: 'Employee',
-    priority: 3
+    priority_level: 2,
+    status: 'active'
   },
   {
-    id: '3',
-    name: 'Mike Johnson',
-    email: 'mike@example.com',
+    user_id: 3,
+    email: 'employee2@example.com',
+    password_hash: 'hashed_pw_3',
     role: 'Employee',
-    priority: 4
+    name: 'Bob Johnson',
+    priority_level: 3,
+    status: 'active'
   }
 ];
 
+// Update mock shifts data
 export const shifts: Shift[] = [
   {
-    id: 'shift-1',
+    shift_id: 1,
+    user_id: 2,
     date: '2025-04-22',
-    startTime: '09:00',
-    endTime: '17:00',
-    employeeIds: ['2'],
-    position: 'Floor Staff',
-    status: 'Scheduled'
+    shift_start_time: '09:00',
+    shift_end_time: '17:00',
+    assignment_type: 'manual',
+    shift_status: 'assigned'
   },
   {
-    id: 'shift-2',
+    shift_id: 2,
+    user_id: 3,
     date: '2025-04-22',
-    startTime: '17:00',
-    endTime: '01:00',
-    employeeIds: ['3'],
-    position: 'Floor Staff',
-    status: 'Scheduled'
+    shift_start_time: '17:00',
+    shift_end_time: '01:00',
+    assignment_type: 'manual',
+    shift_status: 'assigned'
   },
   {
-    id: 'shift-3',
+    shift_id: 3,
+    user_id: 2,
     date: '2025-04-23',
-    startTime: '09:00',
-    endTime: '17:00',
-    employeeIds: ['2', '3'],
-    position: 'Floor Staff',
-    status: 'Scheduled'
+    shift_start_time: '09:00',
+    shift_end_time: '17:00',
+    assignment_type: 'ai-generated',
+    shift_status: 'assigned'
   }
 ];
 
 // Update the mock leaves data to match the snake_case Leave type
 export const leaves: Leave[] = [
   {
-    id: 'leave-1',
-    employee_id: '2',
-    start_date: '2025-04-24',
-    end_date: '2025-04-25',
-    type: 'Vacation',
-    status: 'Approved',
+    leave_id: 1,
+    user_id: 2,
+    leave_type: 'Full Day',
+    start_datetime: '2025-04-24T09:00:00Z',
+    end_datetime: '2025-04-25T17:00:00Z',
     reason: 'Family vacation',
-    submitted_at: '2025-04-15T10:00:00Z'
+    status: 'approved',
+    approver_id: 1,
+    request_timestamp: '2025-04-15T10:00:00Z'
   },
   {
-    id: 'leave-2',
-    employee_id: '3',
-    start_date: '2025-04-26',
-    end_date: '2025-04-26',
-    type: 'Personal',
-    status: 'Pending',
+    leave_id: 2,
+    user_id: 3,
+    leave_type: 'Half Day',
+    start_datetime: '2025-04-26T09:00:00Z',
+    end_datetime: '2025-04-26T13:00:00Z',
     reason: 'Appointment',
-    submitted_at: '2025-04-16T14:30:00Z'
+    status: 'pending',
+    approver_id: 1,
+    request_timestamp: '2025-04-16T14:30:00Z'
   }
 ];
 
 // Functions to fetch data (used by components)
-export const fetchEmployees = async (): Promise<User[]> => {
+export const fetchUsers = async (): Promise<User[]> => {
   try {
-    const { data: employees } = await supabase.from('employees').select('*');
-    
-    if (employees && employees.length > 0) {
-      return employees.map(emp => ({
-        id: emp.id,
-        name: emp.name,
-        email: emp.email,
-        role: emp.role as 'Owner' | 'Employee',
-        priority: emp.priority,
-        avatarUrl: emp.avatar_url
-      }));
+    const result = await supabase.from('users').select('*');
+    const { data: usersData } = result as { data: any[] | null };
+    if (usersData && usersData.length > 0) {
+      return usersData.map(convertUser);
     }
-    
-    // Return mock data if no Supabase data
     return users;
   } catch (error) {
-    console.error('Error fetching employees:', error);
+    console.error('Error fetching users:', error);
     return users;
   }
 };
 
+// Update fetchShifts to match new schema
 export const fetchShifts = async (): Promise<Shift[]> => {
   try {
-    const { data: shiftsData } = await supabase.from('shifts').select('*');
-    const { data: employeeShifts } = await supabase.from('employee_shifts').select('*');
-    
+    const result = await supabase.from('shift_schedule').select('*');
+    const { data: shiftsData } = result as { data: any[] | null };
     if (shiftsData && shiftsData.length > 0) {
-      return shiftsData.map(shift => {
-        // Find all employees assigned to this shift
-        const assignedEmployeeIds = employeeShifts
-          ? employeeShifts
-              .filter(es => es.shift_id === shift.id)
-              .map(es => es.employee_id)
-          : [];
-        
-        return {
-          id: shift.id,
-          date: shift.date,
-          startTime: shift.start_time,
-          endTime: shift.end_time,
-          employeeIds: assignedEmployeeIds,
-          position: shift.position,
-          status: shift.status as 'Scheduled' | 'In Progress' | 'Completed' | 'Unassigned'
-        };
-      });
+      return shiftsData.map(convertShift);
     }
-    
-    // Return mock data if no Supabase data
     return shifts;
   } catch (error) {
     console.error('Error fetching shifts:', error);
@@ -183,16 +166,14 @@ export const fetchShifts = async (): Promise<Shift[]> => {
   }
 };
 
+// Update fetchLeaves to use 'leave_requests' table
 export const fetchLeaves = async (): Promise<Leave[]> => {
   try {
-    const { data: leavesData } = await supabase.from('leave_requests').select('*');
-    
+    const result = await supabase.from('leave_requests').select('*');
+    const { data: leavesData } = result as { data: any[] | null };
     if (leavesData && leavesData.length > 0) {
-      // Already in snake_case format from the database
-      return leavesData as Leave[];
+      return leavesData.map(convertLeave);
     }
-    
-    // Return mock data if no Supabase data
     return leaves;
   } catch (error) {
     console.error('Error fetching leaves:', error);
@@ -200,58 +181,55 @@ export const fetchLeaves = async (): Promise<Leave[]> => {
   }
 };
 
-export const getShiftsByEmployeeId = (employeeId: string): Shift[] => {
-  return shifts.filter(shift => shift.employeeIds.includes(employeeId));
+export const getShiftsByUserId = (userId: number): Shift[] => {
+  return shifts.filter(shift => shift.user_id === userId);
 };
 
-export const getLeavesByEmployeeId = (employeeId: string): Leave[] => {
-  return leaves.filter(leave => leave.employee_id === employeeId);
+export const getLeavesByUserId = (userId: number): Leave[] => {
+  return leaves.filter(leave => leave.user_id === userId);
 };
 
 export const getPendingLeaves = (): Leave[] => {
-  return leaves.filter(leave => leave.status === 'Pending');
+  return leaves.filter(leave => leave.status === 'pending');
 };
 
 export const getUnassignedShifts = (): Shift[] => {
-  return shifts.filter(shift => shift.employeeIds.length === 0 || shift.status === 'Unassigned');
+  return shifts.filter(shift => shift.user_id === 0 || shift.shift_status === 'emergency');
 };
 
-// Function to convert Supabase types to frontend types
-export const convertSupabaseEmployee = (employee: Tables<'employees'>): User => {
+// Function to convert a user row to User type
+export const convertUser = (user: any): User => ({
+  user_id: user.user_id,
+  email: user.email,
+  password_hash: user.password_hash,
+  role: user.role,
+  name: user.name,
+  priority_level: user.priority_level,
+  status: user.status
+});
+
+export const convertLeave = (leave: any): Leave => {
   return {
-    id: employee.id,
-    name: employee.name,
-    email: employee.email,
-    role: employee.role as 'Owner' | 'Employee',
-    priority: employee.priority,
-    avatarUrl: employee.avatar_url || undefined
+    leave_id: leave.leave_id,
+    user_id: leave.user_id,
+    leave_type: leave.leave_type,
+    start_datetime: leave.start_datetime,
+    end_datetime: leave.end_datetime,
+    reason: leave.reason,
+    status: leave.status,
+    approver_id: leave.approver_id,
+    request_timestamp: leave.request_timestamp
   };
 };
 
-export const convertSupabaseLeave = (leave: Tables<'leave_requests'>): Leave => {
+export const convertShift = (shift: any): Shift => {
   return {
-    id: leave.id,
-    employee_id: leave.employee_id,
-    start_date: leave.start_date,
-    end_date: leave.end_date,
-    type: leave.type as 'Vacation' | 'Sick' | 'Personal' | 'Emergency',
-    status: leave.status as 'Pending' | 'Approved' | 'Rejected',
-    reason: leave.reason || '',
-    submitted_at: leave.submitted_at || new Date().toISOString()
-  };
-};
-
-export const convertSupabaseShift = (
-  shift: Tables<'shifts'>, 
-  employeeIds: string[] = []
-): Shift => {
-  return {
-    id: shift.id,
+    shift_id: shift.shift_id,
+    user_id: shift.user_id,
     date: shift.date,
-    startTime: shift.start_time,
-    endTime: shift.end_time,
-    position: shift.position,
-    status: shift.status as 'Scheduled' | 'In Progress' | 'Completed' | 'Unassigned',
-    employeeIds
+    shift_start_time: shift.shift_start_time,
+    shift_end_time: shift.shift_end_time,
+    assignment_type: shift.assignment_type,
+    shift_status: shift.shift_status
   };
 };

@@ -1,12 +1,27 @@
-
 import React from 'react';
-import { Shift, User } from '@/utils/mockData';
 import CustomCard from '@/components/ui/CustomCard';
 import { Badge } from '@/components/ui/badge';
 
+interface Shift {
+  id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  employee_id: string | null;
+  status: 'Assigned' | 'Unassigned';
+  created_at: string;
+}
+
+interface Employee {
+  id: string;
+  name: string;
+  email: string;
+  priority: number;
+}
+
 interface ScheduleOverviewProps {
   shifts: Shift[];
-  employees: User[];
+  employees: Employee[];
   onSelectShift?: (shift: Shift) => void;
 }
 
@@ -21,15 +36,11 @@ const ScheduleOverview: React.FC<ScheduleOverviewProps> = ({ shifts, employees, 
     return acc;
   }, {} as Record<string, Shift[]>);
   
-  // Get employee names by IDs
-  const getEmployeeNames = (employeeIds: string[]): string => {
-    if (employeeIds.length === 0) return 'Unassigned';
-    return employeeIds
-      .map(id => {
-        const employee = employees.find(e => e.id === id);
-        return employee ? employee.name : 'Unknown';
-      })
-      .join(', ');
+  // Get employee name by ID
+  const getEmployeeName = (employeeId: string | null): string => {
+    if (!employeeId) return 'Unassigned';
+    const employee = employees.find(e => e.id === employeeId);
+    return employee ? employee.name : 'Unknown';
   };
   
   // Format date for display
@@ -41,16 +52,12 @@ const ScheduleOverview: React.FC<ScheduleOverviewProps> = ({ shifts, employees, 
   // Status badge colors
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Completed':
-        return <Badge className="bg-green-600">Completed</Badge>;
-      case 'In Progress':
-        return <Badge className="bg-blue-600">In Progress</Badge>;
-      case 'Scheduled':
-        return <Badge className="bg-scheduler-primary">Scheduled</Badge>;
+      case 'Assigned':
+        return <Badge className="bg-[#001140] text-[#f2fdff]">Assigned</Badge>;
       case 'Unassigned':
-        return <Badge variant="destructive">Unassigned</Badge>;
+        return <Badge className="bg-[#ef4444] text-[#f2fdff]">Unassigned</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge className="border-[#261e67] text-[#001140]">{status}</Badge>;
     }
   };
 
@@ -61,27 +68,27 @@ const ScheduleOverview: React.FC<ScheduleOverviewProps> = ({ shifts, employees, 
   
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Schedule Overview</h3>
+      <h3 className="text-lg font-semibold text-[#001140]">Schedule Overview</h3>
       
       <div className="space-y-4">
         {sortedDates.slice(0, 5).map(date => (
           <div key={date} className="space-y-2">
-            <h4 className="font-medium text-sm">{formatDate(date)}</h4>
+            <h4 className="font-medium text-sm text-[#6f7d7f]">{formatDate(date)}</h4>
             
             <div className="grid grid-cols-1 gap-2">
               {shiftsByDate[date].map(shift => (
                 <CustomCard 
                   key={shift.id}
-                  className={`${shift.status === 'Unassigned' ? 'border-red-300' : ''}`}
+                  className={`${shift.status === 'Unassigned' ? 'border-[#ef4444]' : 'border-[#261e67]'}`}
                   isHoverable={!!onSelectShift}
                   onClick={() => onSelectShift && onSelectShift(shift)}
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <span className="text-sm font-medium">
-                        {shift.startTime} - {shift.endTime}
+                      <span className="text-sm font-medium text-[#001140]">
+                        {shift.start_time} - {shift.end_time}
                       </span>
-                      <p className="text-sm mt-1">{getEmployeeNames(shift.employeeIds)}</p>
+                      <p className="text-sm mt-1 text-[#6f7d7f]">{getEmployeeName(shift.employee_id)}</p>
                     </div>
                     <div>
                       {getStatusBadge(shift.status)}

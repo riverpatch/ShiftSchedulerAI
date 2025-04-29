@@ -3,124 +3,136 @@ import { Check, X, Calendar } from 'lucide-react';
 import CustomButton from '@/components/ui/CustomButton';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { approveLeave, rejectLeave } from '@/utils/supabaseApi';
 import { toast } from 'react-hot-toast';
+import { Leave } from '@/types/leave';
 
-interface Leave {
-  id: string;
-  employee_id: string;
-  start_date: string;
-  end_date: string;
-  type: string;
-  status: string;
-  reason: string;
-  submitted_at: string;
-}
-interface User {
+interface Employee {
   id: string;
   name: string;
-}
-interface LeaveRequestListProps {
-  leaves: Leave[];
-  employees: User[];
-  onLeaveStatusChange: () => void;
+  email: string;
+  priority: number;
 }
 
-const LeaveRequestList: React.FC<LeaveRequestListProps> = ({ leaves, employees, onLeaveStatusChange }) => {
-  const [processingLeaveId, setProcessingLeaveId] = useState<string | null>(null);
-  
-  const getEmployeeName = (employeeId: string): string => {
-    const employee = employees.find(e => e.id === employeeId);
+interface LeaveRequestListProps {
+  leaves: Leave[];
+  employees: Array<{
+    id: string;
+    name: string;
+    email: string;
+    priority: number;
+  }>;
+  onLeaveStatusChange: (leaveId: number, newStatus: 'approved' | 'rejected') => void;
+}
+
+const LeaveRequestList: React.FC<LeaveRequestListProps> = ({
+  leaves,
+  employees,
+  onLeaveStatusChange,
+}) => {
+  const [processingLeaveId, setProcessingLeaveId] = useState<number | null>(null);
+
+  const handleApprove = async (leaveId: number) => {
+    setProcessingLeaveId(leaveId);
+    try {
+      await onLeaveStatusChange(leaveId, 'approved');
+      toast.success('Leave request approved');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to approve leave request');
+    } finally {
+      setProcessingLeaveId(null);
+    }
+  };
+
+  const handleReject = async (leaveId: number) => {
+    setProcessingLeaveId(leaveId);
+    try {
+      await onLeaveStatusChange(leaveId, 'rejected');
+      toast.success('Leave request rejected');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to reject leave request');
+    } finally {
+      setProcessingLeaveId(null);
+    }
+  };
+
+  const getEmployeeName = (userId: number) => {
+    const employee = employees.find(emp => emp.id === String(userId));
     return employee ? employee.name : 'Unknown Employee';
   };
-  
-  const handleApproveLeave = async (leaveId: string) => {
-    setProcessingLeaveId(leaveId);
-    try {
-      await approveLeave(leaveId);
-      toast.success('Leave request approved');
-      onLeaveStatusChange();
-    } catch (error) {
-      toast.error('Failed to approve leave');
-      console.error(error);
-    } finally {
-      setProcessingLeaveId(null);
+
+  const getStatusBadge = (status: 'pending' | 'approved' | 'rejected') => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="warning">Pending</Badge>;
+      case 'approved':
+        return <Badge variant="success">Approved</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive">Rejected</Badge>;
+      default:
+        return <Badge variant="outline">Unknown</Badge>;
     }
   };
-  
-  const handleRejectLeave = async (leaveId: string) => {
-    setProcessingLeaveId(leaveId);
-    try {
-      await rejectLeave(leaveId);
-      toast.success('Leave request rejected');
-      onLeaveStatusChange();
-    } catch (error) {
-      toast.error('Failed to reject leave');
-      console.error(error);
-    } finally {
-      setProcessingLeaveId(null);
-    }
-  };
-  
+
   const formatDate = (dateStr: string): string => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const pendingLeaves = leaves.filter(leave => leave.status === 'Pending');
-  const recentLeaves = leaves.filter(leave => leave.status !== 'Pending');
+  const pendingLeaves = leaves
+    .filter(leave => leave.status === 'Pending' && leave.leave_id !== undefined)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  
+  const recentLeaves = leaves
+    .filter(leave => leave.status !== 'Pending' && leave.leave_id !== undefined)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Leave Requests</h3>
       
       {pendingLeaves.length === 0 ? (
-        <div className="text-center py-6 bg-muted/30 rounded-lg">
+        <div key="no-pending-leaves" className="text-center py-6 bg-muted/30 rounded-lg">
           <Calendar className="mx-auto h-8 w-8 text-muted-foreground" />
           <p className="mt-2 text-muted-foreground">No pending leave requests</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div key="pending-leaves-container" className="space-y-3">
           <p className="text-sm text-muted-foreground">{pendingLeaves.length} pending requests</p>
           
           {pendingLeaves.map(leave => (
-            <div key={leave.id} className="border rounded-lg p-4 bg-white">
+            <div key={`leave-${leave.leave_id}`} className="border rounded-lg p-4 bg-white">
               <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="font-semibold">{getEmployeeName(leave.employee_id)}</h4>
+                  <h4 className="font-semibold">{getEmployeeName(leave.user_id)}</h4>
                   <div className="flex items-center mt-1">
-                    <Badge className="bg-scheduler-primary">{leave.type}</Badge>
-                    <span className="text-sm text-muted-foreground ml-2">
-                      {leave.start_date === leave.end_date 
-                        ? formatDate(leave.start_date)
-                        : `${formatDate(leave.start_date)} - ${formatDate(leave.end_date)}`
-                      }
+                    <span className="text-sm text-muted-foreground">
+                      {formatDate(leave.start_date)} - {formatDate(leave.end_date)}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm">{leave.reason}</p>
                 </div>
                 
-                <div className="flex space-x-2">
-                  <CustomButton
-                    size="sm"
-                    variant="success"
-                    onClick={() => handleApproveLeave(leave.id)}
-                    isLoading={processingLeaveId === leave.id}
-                    disabled={processingLeaveId !== null}
-                    icon={<Check className="h-4 w-4" />}
-                  >
-                    Approve
-                  </CustomButton>
-                  <CustomButton
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleRejectLeave(leave.id)}
-                    isLoading={processingLeaveId === leave.id}
-                    disabled={processingLeaveId !== null}
-                    icon={<X className="h-4 w-4" />}
-                  >
-                    Reject
-                  </CustomButton>
+                <div className="flex items-center space-x-2">
+                  {getStatusBadge(leave.status)}
+                  {leave.status === 'pending' && (
+                    <>
+                      <button
+                        onClick={() => handleApprove(leave.leave_id)}
+                        disabled={processingLeaveId === leave.leave_id}
+                        className="text-green-600 hover:text-green-700 disabled:opacity-50"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleReject(leave.leave_id)}
+                        disabled={processingLeaveId === leave.leave_id}
+                        className="text-red-600 hover:text-red-700 disabled:opacity-50"
+                      >
+                        Reject
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -129,36 +141,39 @@ const LeaveRequestList: React.FC<LeaveRequestListProps> = ({ leaves, employees, 
       )}
       
       {recentLeaves.length > 0 && (
-        <>
+        <div key="recent-leaves-container">
           <Separator />
           <h4 className="font-medium text-sm">Recent Activity</h4>
           <div className="space-y-2">
-            {recentLeaves.slice(0, 3).map(leave => (
-              <div key={leave.id} className="border rounded-lg p-3 bg-white">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h5 className="font-medium">{getEmployeeName(leave.employee_id)}</h5>
-                    <div className="flex items-center mt-1">
-                      <Badge className={
-                        leave.status === 'Approved' 
-                          ? 'bg-green-600' 
-                          : 'bg-red-600'
-                      }>
-                        {leave.status}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground ml-2">
-                        {formatDate(leave.start_date)}
-                      </span>
+            {recentLeaves.slice(0, 3).map(leave => {
+              if (!leave.leave_id) return null;
+              return (
+                <div key={`recent-${leave.leave_id}`} className="border rounded-lg p-3 bg-white">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h5 className="font-medium">{getEmployeeName(leave.user_id)}</h5>
+                      <div className="flex items-center mt-1">
+                        <Badge 
+                          key={`badge-${leave.leave_id}`}
+                          className={
+                            leave.status === 'Approved' 
+                              ? 'bg-green-600' 
+                              : 'bg-red-600'
+                          }
+                        >
+                          {leave.status}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {formatDate(leave.start_date)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-xs">
-                    {leave.type}
-                  </Badge>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
-        </>
+        </div>
       )}
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { cn } from '@/lib/utils';
@@ -17,7 +16,7 @@ const CustomButton = React.forwardRef<HTMLButtonElement, CustomButtonProps>(
       'secondary': 'bg-scheduler-secondary text-white hover:bg-scheduler-tertiary',
       'success': 'bg-scheduler-success text-white hover:bg-green-600',
       'warning': 'bg-scheduler-warning text-white hover:bg-orange-600',
-      'destructive': 'bg-scheduler-danger text-white hover:bg-red-600',
+      'destructive': 'bg-destructive text-destructive-foreground hover:bg-destructive',
     };
 
     return (
@@ -25,6 +24,7 @@ const CustomButton = React.forwardRef<HTMLButtonElement, CustomButtonProps>(
         className={cn(
           variant !== 'default' && variant in variantClasses ? variantClasses[variant as keyof typeof variantClasses] : '',
           isLoading && 'opacity-70 pointer-events-none',
+          props.disabled && '!opacity-100',
           className
         )}
         variant={variant === 'primary' || variant === 'secondary' || variant === 'success' || variant === 'warning' ? 'default' : variant}

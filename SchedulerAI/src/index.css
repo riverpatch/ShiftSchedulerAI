@@ -1,7 +1,6 @@
+/* Your Google Fonts import comes FIRST */
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
 @import "tailwindcss";
-@source "./src/**/*.{html,js,jsx,ts,tsx}";
-
 @theme {
   --font-heading: "Montserrat", sans-serif;
   --font-display: "Rubik", sans-serif;
@@ -104,31 +103,43 @@
   }
 }
 
+
+/* Custom base layer */
 @layer base {
   body {
-    font-family: var(--font-display);
+    font-family: 'Rubik', sans-serif;
+    @apply bg-[#f2fdff] text-[#001140];
     margin: 0;
     padding: 0;
     overflow-x: hidden;
   }
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-heading);
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  html {
+    @apply overflow-y-scroll overflow-x-hidden scroll-smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #261e67 #f2fdff;
+  }
+
+  /* Webkit scrollbar styles */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-[#f2fdff];
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-[#261e67] rounded-full;
   }
 }
 
-@layer base {
-  html {
-    overflow-y: scroll;
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-light-background) #261e67;
-    scroll-behavior: smooth;
-    overflow-x: hidden;
-  }
+/* Components like hover cards and badges */
+
 }
 
 @layer utilities {
@@ -208,34 +219,25 @@
     border-radius: calc(var(--radius) - 4px);
   }
 }
+
 @layer components {
-  /* Hoverable card */
   .card-hover {
-    @apply transition-all duration-200 hover:shadow-md hover:scale-[1.01] cursor-pointer;
+    @apply transition-all duration-200 hover:shadow-md hover:scale-105 cursor-pointer;
   }
 
-  /* Status Badges */
   .status-badge-approved {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
-    background-color: #d1fae5; /* Light green background */
-    color: #065f46; /* Dark green text */
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800;
   }
 
   .status-badge-pending {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
-    background-color: #fef9c3; /* Light yellow background */
-    color: #92400e; /* Dark yellow text */
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800;
   }
 
   .status-badge-rejected {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
-    background-color: #fee2e2; /* Light red background */
-    color: #991b1b; /* Dark red text */
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800;
   }
 
   .status-badge-emergency {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium animate-pulse;
-    background-color: #fee2e2; /* Light red background */
-    color: #991b1b; /* Dark red text */
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 animate-pulse;
   }
 }

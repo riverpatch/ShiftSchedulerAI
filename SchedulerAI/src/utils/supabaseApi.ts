@@ -1,74 +1,50 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Leave, LeaveRequestRow } from '@/types/leave';
 
-// Fetch all employees (optionally filter by role)
-export async function getEmployees(role?: string) {
-  let query = supabase.from('employees').select('*');
-  if (role) query = query.eq('role', role);
-  const { data, error } = await query;
-  if (error) throw error;
-  return data as Tables<'employees'>[];
-}
-
-// Fetch all shifts
-export async function getShifts() {
-  const { data, error } = await supabase.from('shifts').select('*');
-  if (error) throw error;
-  return data as Tables<'shifts'>[];
-}
-
-// Fetch all employee_shifts
-export async function getEmployeeShifts(employeeId: string) {
-  const { data, error } = await supabase
-    .from('employee_shifts')
-    .select('*, shift:shifts(*)')
-    .eq('employee_id', employeeId);
-  if (error) throw error;
-  return data;
+// Conversion helper for Leave
+function convertLeave(row: LeaveRequestRow): Leave {
+  return {
+    leave_id: row.leave_id,
+    user_id: row.user_id,
+    leave_type: row.leave_type,
+    start_datetime: row.start_datetime,
+    end_datetime: row.end_datetime,
+    reason: row.reason,
+    status: row.status as 'pending' | 'approved' | 'rejected',
+    approver_id: row.approver_id,
+    request_timestamp: row.request_timestamp,
+  };
 }
 
 // Fetch all leave requests
-export async function getLeaveRequests() {
-  const { data, error } = await supabase.from('leave_requests').select('*');
+export async function getLeaveRequests(): Promise<Leave[]> {
+  const { data, error } = await supabase
+    .from('leave_requests')
+    .select('*') as { data: LeaveRequestRow[] | null; error: any };
   if (error) throw error;
-  return data as Tables<'leave_requests'>[];
+  return Array.isArray(data) ? data.map(convertLeave) : [];
 }
 
 // Approve a leave request
-export async function approveLeave(leaveId: string) {
+export async function approveLeave(leaveId: number): Promise<Leave> {
   const { data, error } = await supabase
     .from('leave_requests')
-    .update({ status: 'Approved' })
-    .eq('id', leaveId)
+    .update({ status: 'approved' })
+    .eq('leave_id', leaveId)
     .select()
-    .maybeSingle();
+    .single() as { data: LeaveRequestRow | null; error: any };
   if (error) throw error;
-  return data;
+  return convertLeave(data!);
 }
 
 // Reject a leave request
-export async function rejectLeave(leaveId: string) {
+export async function rejectLeave(leaveId: number): Promise<Leave> {
   const { data, error } = await supabase
     .from('leave_requests')
-    .update({ status: 'Rejected' })
-    .eq('id', leaveId)
+    .update({ status: 'rejected' })
+    .eq('leave_id', leaveId)
     .select()
-    .maybeSingle();
+    .single() as { data: LeaveRequestRow | null; error: any };
   if (error) throw error;
-  return data;
-}
-
-// Assign employees to a shift
-export async function assignShift(shiftId: string, employeeIds: string[]) {
-  // First, remove any existing assignments for this shift:
-  await supabase.from('employee_shifts').delete().eq('shift_id', shiftId);
-  // Next, assign shift to employeeIds
-  const rows = employeeIds.map(employee_id => ({
-    shift_id: shiftId,
-    employee_id,
-  }));
-  const { data, error } = await supabase.from('employee_shifts').insert(rows).select();
-  if (error) throw error;
-  return data;
+  return convertLeave(data!);
 }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
@@ -62,13 +61,13 @@ const LeaveRequestForm: React.FC = () => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Start Date</label>
+          <label className="text-sm font-medium text-[#001140]">Start Date</label>
           <Popover>
             <PopoverTrigger asChild>
               <button
                 className={cn(
-                  "w-full flex items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-sm font-normal",
-                  !startDate && "text-muted-foreground"
+                  "w-full flex items-center justify-start rounded-md border border-[#261e67] bg-[#f2fdff] px-3 py-2 text-sm font-normal text-[#001140]",
+                  !startDate && "text-[#6f7d7f]"
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -88,13 +87,13 @@ const LeaveRequestForm: React.FC = () => {
         </div>
         
         <div className="space-y-2">
-          <label className="text-sm font-medium">End Date</label>
+          <label className="text-sm font-medium text-[#001140]">End Date</label>
           <Popover>
             <PopoverTrigger asChild>
               <button
                 className={cn(
-                  "w-full flex items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-sm font-normal",
-                  !endDate && "text-muted-foreground"
+                  "w-full flex items-center justify-start rounded-md border border-[#261e67] bg-[#f2fdff] px-3 py-2 text-sm font-normal text-[#001140]",
+                  !endDate && "text-[#6f7d7f]"
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -106,7 +105,7 @@ const LeaveRequestForm: React.FC = () => {
                 mode="single"
                 selected={endDate}
                 onSelect={setEndDate}
-                disabled={(date) => date < (startDate || new Date())}
+                disabled={(date) => date < new Date()}
                 initialFocus
               />
             </PopoverContent>
@@ -115,7 +114,7 @@ const LeaveRequestForm: React.FC = () => {
       </div>
       
       <div className="space-y-2">
-        <label className="text-sm font-medium">Leave Type</label>
+        <label className="text-sm font-medium text-[#001140]">Leave Type</label>
         <Select value={leaveType} onValueChange={setLeaveType}>
           <SelectTrigger>
             <SelectValue placeholder="Select leave type" />
@@ -129,12 +128,12 @@ const LeaveRequestForm: React.FC = () => {
       </div>
       
       <div className="space-y-2">
-        <label className="text-sm font-medium">Reason</label>
+        <label className="text-sm font-medium text-[#001140]">Reason</label>
         <Textarea
-          placeholder="Provide details about your leave request"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          className="min-h-[100px]"
+          placeholder="Enter your reason for leave"
+          className="border border-[#261e67] bg-[#f2fdff] text-[#001140]"
         />
       </div>
       
@@ -142,6 +141,7 @@ const LeaveRequestForm: React.FC = () => {
         <CustomButton
           type="submit"
           variant="primary"
+          className="bg-[#001140] text-[#f2fdff] hover:bg-[#261e67]"
           isLoading={isSubmitting}
         >
           Submit Request

@@ -1,4 +1,4 @@
-import { getShifts } from './supabaseApi';
+import { fetchShifts } from './mockData';
 import { User, Shift, Leave } from './mockData';
 
 export const getScheduleStats = async (): Promise<{
@@ -8,12 +8,12 @@ export const getScheduleStats = async (): Promise<{
   completedShifts: number;
   upcomingShifts: number;
 }> => {
-  const shifts = await getShifts();
+  const shifts = await fetchShifts();
   const totalShifts = shifts.length;
-  const assignedShifts = shifts.filter(s => !!s.id).length;
-  const unassignedShifts = shifts.filter(s => !s.id).length;
-  const completedShifts = shifts.filter(s => s.status === 'Completed').length;
-  const upcomingShifts = shifts.filter(s => s.status === 'Scheduled').length;
+  const assignedShifts = shifts.filter(s => !!s.shift_id).length;
+  const unassignedShifts = shifts.filter(s => !s.shift_id).length;
+  const completedShifts = shifts.filter(s => s.shift_status === 'assigned').length;
+  const upcomingShifts = shifts.filter(s => s.shift_status === 'assigned').length;
   return {
     totalShifts,
     assignedShifts,
@@ -44,11 +44,11 @@ export const generateSchedule = (
       const endDate = new Date(dateRange.end);
       
       // Create a map of employees to their leave days
-      const employeeLeaves = new Map<string, string[]>();
+      const employeeLeaves = new Map<number, string[]>();
       leaveRequests.forEach(leave => {
-        if (leave.status === 'Approved') {
-          const start = new Date(leave.start_date);
-          const end = new Date(leave.end_date);
+        if (leave.status === 'approved') {
+          const start = new Date(leave.start_datetime);
+          const end = new Date(leave.end_datetime);
           const days: string[] = [];
           
           // Get all days between start and end
@@ -56,10 +56,10 @@ export const generateSchedule = (
             days.push(d.toISOString().split('T')[0]);
           }
           
-          if (employeeLeaves.has(leave.employee_id)) {
-            employeeLeaves.get(leave.employee_id)?.push(...days);
+          if (employeeLeaves.has(leave.user_id)) {
+            employeeLeaves.get(leave.user_id)?.push(...days);
           } else {
-            employeeLeaves.set(leave.employee_id, days);
+            employeeLeaves.set(leave.user_id, days);
           }
         }
       });
@@ -71,30 +71,30 @@ export const generateSchedule = (
         // Morning shift (8am - 4pm)
         const morningEmployees = assignEmployeesToShift(employees, employeeLeaves, dateStr, 2);
         newShifts.push({
-          id: `shift-${dateStr}-morning`,
+          shift_id: Number(`${dateStr.replace(/-/g, '')}1`),
           date: dateStr,
-          startTime: '08:00',
-          endTime: '16:00',
-          employeeIds: morningEmployees,
-          position: 'Floor Staff',
-          status: morningEmployees.length > 0 ? 'Scheduled' : 'Unassigned',
+          shift_start_time: '08:00',
+          shift_end_time: '16:00',
+          user_id: 0,
+          assignment_type: 'manual',
+          shift_status: morningEmployees.length > 0 ? 'assigned' : 'emergency',
         });
         
         // Evening shift (4pm - 12am)
         const eveningEmployees = assignEmployeesToShift(
-          employees.filter(e => !morningEmployees.includes(e.id)), 
+          employees.filter(e => !morningEmployees.includes(e.user_id)), 
           employeeLeaves, 
           dateStr,
           2
         );
         newShifts.push({
-          id: `shift-${dateStr}-evening`,
+          shift_id: Number(`${dateStr.replace(/-/g, '')}2`),
           date: dateStr,
-          startTime: '16:00',
-          endTime: '00:00',
-          employeeIds: eveningEmployees,
-          position: 'Floor Staff',
-          status: eveningEmployees.length > 0 ? 'Scheduled' : 'Unassigned',
+          shift_start_time: '16:00',
+          shift_end_time: '00:00',
+          user_id: 0,
+          assignment_type: 'manual',
+          shift_status: eveningEmployees.length > 0 ? 'assigned' : 'emergency',
         });
       }
       
@@ -106,21 +106,21 @@ export const generateSchedule = (
 // Helper to assign employees to a shift
 const assignEmployeesToShift = (
   availableEmployees: User[],
-  employeeLeaves: Map<string, string[]>,
+  employeeLeaves: Map<number, string[]>,
   date: string,
   count: number
-): string[] => {
+): number[] => {
   // Filter out employees on leave for this date
   const employees = availableEmployees.filter(emp => {
-    const leaveDays = employeeLeaves.get(emp.id) || [];
+    const leaveDays = employeeLeaves.get(emp.user_id) || [];
     return !leaveDays.includes(date);
   });
   
-  // Sort by priority (highest first)
-  employees.sort((a, b) => b.priority - a.priority);
+  // Sort by priority_level (highest first)
+  employees.sort((a, b) => b.priority_level - a.priority_level);
   
   // Return the top 'count' employees, or all if fewer are available
-  return employees.slice(0, count).map(e => e.id);
+  return employees.slice(0, count).map(e => e.user_id);
 };
 
 // Handle emergency leave and reschedule
@@ -134,7 +134,7 @@ export const handleEmergencyLeave = (
     setTimeout(() => {
       // Find shifts affected by this emergency leave
       const affectedShifts = shifts.filter(
-        shift => shift.date === date && shift.employeeIds.includes(employeeId)
+        shift => shift.date === date && shift.user_id === Number(employeeId)
       );
       
       let suggestedReplacement: User | null = null;
@@ -142,30 +142,30 @@ export const handleEmergencyLeave = (
       
       // Handle each affected shift
       affectedShifts.forEach(shift => {
-        const shiftIndex = updatedShifts.findIndex(s => s.id === shift.id);
+        const shiftIndex = updatedShifts.findIndex(s => s.shift_id === shift.shift_id);
         
         if (shiftIndex >= 0) {
           // Remove the employee from the shift
-          const updatedEmployeeIds = shift.employeeIds.filter(id => id !== employeeId);
+          const updatedEmployeeIds = shift.user_id !== Number(employeeId) ? [shift.user_id] : [];
           
           // Find available replacement
           const availableEmployees = employees.filter(e => 
-            e.id !== employeeId && !shift.employeeIds.includes(e.id)
+            e.user_id !== Number(employeeId) && shift.user_id !== e.user_id
           );
           
-          // Sort by priority
-          availableEmployees.sort((a, b) => b.priority - a.priority);
+          // Sort by priority_level
+          availableEmployees.sort((a, b) => b.priority_level - a.priority_level);
           
           if (availableEmployees.length > 0) {
             suggestedReplacement = availableEmployees[0];
-            updatedEmployeeIds.push(suggestedReplacement.id);
+            updatedEmployeeIds.push(suggestedReplacement.user_id);
           }
           
           // Update the shift
           updatedShifts[shiftIndex] = {
             ...shift,
-            employeeIds: updatedEmployeeIds,
-            status: updatedEmployeeIds.length > 0 ? 'Scheduled' : 'Unassigned'
+            user_id: updatedEmployeeIds.length > 0 ? suggestedReplacement.user_id : 0,
+            shift_status: updatedEmployeeIds.length > 0 ? 'assigned' : 'emergency',
           };
         }
       });

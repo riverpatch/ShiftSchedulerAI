@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
@@ -39,7 +38,7 @@ const EmergencyLeave: React.FC<EmergencyLeaveProps> = ({
       
       // Check if employee has shifts today
       const todayShifts = shifts.filter(
-        shift => shift.date === today && shift.employeeIds.includes(employeeId)
+        shift => shift.date === today && shift.user_id === Number(employeeId)
       );
       
       if (todayShifts.length === 0) {
@@ -76,57 +75,58 @@ const EmergencyLeave: React.FC<EmergencyLeaveProps> = ({
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
         <CustomButton 
-          variant="destructive"
-          className="w-full"
-          icon={<AlertTriangle className="h-4 w-4" />}
+          className={`w-full bg-[#ef4444] text-[#fff] border-none hover:bg-[#ef4444]${isSubmitting ? ' pointer-events-none' : ''}`}
+          icon={<AlertTriangle className="h-4 w-4 text-[#fff]" />}
         >
           Emergency Leave Request
         </CustomButton>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-red-600 flex items-center">
-            <AlertTriangle className="h-5 w-5 mr-2" />
-            Emergency Leave
-          </DialogTitle>
-          <DialogDescription>
-            Submit an emergency leave request for today's shift.
-            This will immediately notify management and trigger the AI scheduler
-            to find a replacement.
+          <DialogTitle className="text-[#001140]">Emergency Leave Request</DialogTitle>
+          <DialogDescription className="text-[#6f7d7f]">
+            Please provide details about your emergency leave request
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Emergency Reason</label>
-            <Textarea
-              placeholder="Explain your emergency situation"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="min-h-[100px]"
-            />
+        <div className="space-y-4 py-4">
+          <div className="bg-destructive/10 p-3 rounded-md space-y-2 border border-destructive">
+            <div className="flex items-center space-x-2">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              <span className="text-sm font-medium text-destructive">Emergency Leave</span>
+            </div>
+            <p className="text-sm text-destructive">
+              This will automatically notify your manager and attempt to find a replacement for your shifts.
+            </p>
           </div>
           
-          <div className="bg-red-50 text-red-800 p-3 rounded-md text-sm">
-            <strong>Important:</strong> Emergency leave should only be used for genuine emergencies.
-            Misuse may affect your priority status for future scheduling.
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[#001140]">Reason</label>
+            <Textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Please explain your emergency situation"
+              className="border border-[#261e67] bg-[#f2fdff] text-[#001140]"
+            />
           </div>
         </div>
-        
-        <DialogFooter className="gap-2 sm:gap-0">
+
+        <DialogFooter>
           <CustomButton
             variant="outline"
             onClick={() => setIsDialogOpen(false)}
+            className="border border-[#261e67] text-[#001140] hover:bg-[#e6f2f9]"
             disabled={isSubmitting}
           >
             Cancel
           </CustomButton>
           <CustomButton
-            variant="destructive"
+            variant="primary"
             onClick={submitEmergencyLeave}
+            className="bg-[#001140] text-[#f2fdff] hover:bg-[#261e67]"
             isLoading={isSubmitting}
           >
-            Submit Emergency Leave
+            Submit Request
           </CustomButton>
         </DialogFooter>
       </DialogContent>

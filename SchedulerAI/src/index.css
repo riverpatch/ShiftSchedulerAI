@@ -1,415 +1,61 @@
+/* Your Google Fonts import comes FIRST */
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
+
 @import "tailwindcss";
-@source "./src/**/*.{html,js,jsx,ts,tsx}";
 
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
-@import "tailwindcss";
-@source "./src/**/*.{html,js,jsx,ts,tsx}";
-
-@theme {
-  --font-heading: "Montserrat", sans-serif;
-  --font-display: "Rubik", sans-serif;
-}
-
+/* Custom base layer */
 @layer base {
   body {
-    font-family: var(--font-display);
+    font-family: 'Rubik', sans-serif;
+    @apply bg-[#f2fdff] text-[#001140];
     margin: 0;
     padding: 0;
     overflow-x: hidden;
   }
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-heading);
-  }
-}
 
-@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+  }
+
   html {
-    overflow-y: scroll;
+    @apply overflow-y-scroll overflow-x-hidden scroll-smooth;
     scrollbar-width: thin;
-    scrollbar-color: var(--color-light-background) #261e67;
-    scroll-behavior: smooth;
-    overflow-x: hidden;
+    scrollbar-color: #261e67 #f2fdff;
+  }
+
+  /* Webkit scrollbar styles */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-[#f2fdff];
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-[#261e67] rounded-full;
   }
 }
 
-@layer base {
-  :root {
-    /* Core HEX palette for Light Mode */
-    --background: #ffffff; /* Pure White background */
-    --foreground: #0a0a23; /* Deep dark text (almost black navy) */
-
-    --border: #cbd5e1; /* Light border */
-    --input: #e2e8f0; /* Light input background */
-    --ring: #ef476f; /* Pink accent ring */
-
-    /* Semantic Colors */
-    --primary: #261e67; /* Deep primary text */
-    --primary-foreground: #ffffff; /* On dark buttons */
-
-    --secondary: #f1f5f9; /* Soft light gray background */
-    --secondary-foreground: #0a0a23;
-
-    --destructive: #ef4444; /* Red for destructive */
-    --destructive-foreground: #ffffff;
-
-    --muted: #f8fafc; /* Very soft muted background */
-    --muted-foreground: #6b7280; /* Medium gray text */
-
-    --accent: #ef476f; /* Vibrant pink accent */
-    --accent-foreground: #ffffff; /* Text on pink accent */
-
-    --popover: #f8fafc;
-    --popover-foreground: #0a0a23;
-
-    --card: #ffffff;
-    --card-foreground: #0a0a23;
-
-    /* Sidebar */
-    --sidebar-background: #f1f5f9;
-    --sidebar-foreground: #0a0a23;
-    --sidebar-primary: #261e67;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #e6f2f9;
-    --sidebar-accent-foreground: #0a0a23;
-    --sidebar-border: #cbd5e1;
-    --sidebar-ring: #ef476f;
-
-    /* Scheduler Palette */
-    --scheduler-primary: #c0bcf5; /* Light Purple */
-    --scheduler-secondary: #6f7d7f; /* Secondary text gray */
-    --scheduler-tertiary: #261e67; /* Primary text dark */
-    --scheduler-dark: #0a0a23; /* Dark text for light backgrounds */
-    --scheduler-light: #e6f2f9; /* Light blue background */
-    --scheduler-success: #22c55e;
-    --scheduler-warning: #f97316;
-    --scheduler-danger: #ef4444;
-    --scheduler-info: #0ea5e9;
-
-    /* Border radius */
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    /* Fallback if theme switching later */
-    --background: #001140;
-    --foreground: #defafe;
-    --border: #1e2850;
-    --input: #1e2850;
-    --ring: #ef476f;
-  }
-
-  body {
-    background-color: var(--background);
-    color: var(--foreground);
-  }
-}
-
-@layer utilities {
-  /* Container */
-  .container {
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-
-  @media (min-width: 1536px) {
-    .container {
-      max-width: 1400px;
-    }
-  }
-
-  /* Backgrounds & text */
-  .bg-background {
-    background-color: var(--background);
-  }
-
-  .text-foreground {
-    color: var(--foreground);
-  }
-
-  .bg-input {
-    background-color: var(--input);
-  }
-
-  .ring-ring {
-    --tw-ring-color: var(--ring);
-  }
-
-  /* Semantic */
-  .bg-primary {
-    background-color: var(--primary);
-  }
-
-  .text-primary-foreground {
-    color: var(--primary-foreground);
-  }
-
-  .bg-secondary {
-    background-color: var(--secondary);
-  }
-
-  .text-secondary-foreground {
-    color: var(--secondary-foreground);
-  }
-
-  .bg-destructive {
-    background-color: var(--destructive);
-  }
-
-  .text-destructive-foreground {
-    color: var(--destructive-foreground);
-  }
-
-  .bg-muted {
-    background-color: var(--muted);
-  }
-
-  .text-muted-foreground {
-    color: var(--muted-foreground);
-  }
-
-  .bg-accent {
-    background-color: var(--accent);
-  }
-
-  .text-accent-foreground {
-    color: var(--accent-foreground);
-  }
-
-  /* Popover & Card */
-  .bg-popover {
-    background-color: var(--popover);
-  }
-
-  .text-popover-foreground {
-    color: var(--popover-foreground);
-  }
-
-  .bg-card {
-    background-color: var(--card);
-  }
-
-  .text-card-foreground {
-    color: var(--card-foreground);
-  }
-
-  /* Sidebar */
-  .bg-sidebar {
-    background-color: var(--sidebar-background);
-  }
-
-  .text-sidebar-foreground {
-    color: var(--sidebar-foreground);
-  }
-
-  .bg-sidebar-primary {
-    background-color: var(--sidebar-primary);
-  }
-
-  .text-sidebar-primary-foreground {
-    color: var(--sidebar-primary-foreground);
-  }
-
-  .bg-sidebar-accent {
-    background-color: var(--sidebar-accent);
-  }
-
-  .text-sidebar-accent-foreground {
-    color: var(--sidebar-accent-foreground);
-  }
-
-  .border-sidebar-border {
-    border-color: var(--sidebar-border);
-  }
-
-  .ring-sidebar-ring {
-    --tw-ring-color: var(--sidebar-ring);
-  }
-
-  /* Border */
-  .border-border {
-    border-color: var(--border);
-  }
-
-  /* Gradient stops */
-  .from-scheduler-light {
-    --tw-gradient-from: var(--scheduler-light);
-  }
-
-  .via-white {
-    --tw-gradient-stops: var(--tw-gradient-from), white,
-      var(--tw-gradient-to);
-  }
-
-  .to-accent {
-    --tw-gradient-to: var(--accent);
-  }
-
-  /* Scheduler Text Colors */
-  .text-scheduler-primary {
-    color: var(--scheduler-primary);
-  }
-
-  .text-scheduler-secondary {
-    color: var(--scheduler-secondary);
-  }
-
-  .text-scheduler-tertiary {
-    color: var(--scheduler-tertiary);
-  }
-
-  .text-scheduler-dark {
-    color: var(--scheduler-dark);
-  }
-
-  .text-scheduler-light {
-    color: var(--scheduler-light);
-  }
-
-  .text-success {
-    color: var(--scheduler-success);
-  }
-
-  .text-warning {
-    color: var(--scheduler-warning);
-  }
-
-  .text-danger {
-    color: var(--scheduler-danger);
-  }
-
-  .text-info {
-    color: var(--scheduler-info);
-  }
-
-  /* Scheduler Backgrounds */
-  .bg-scheduler-primary {
-    background-color: var(--scheduler-primary);
-  }
-
-  .bg-scheduler-secondary {
-    background-color: var(--scheduler-secondary);
-  }
-
-  .bg-scheduler-tertiary {
-    background-color: var(--scheduler-tertiary);
-  }
-
-  .bg-scheduler-dark {
-    background-color: var(--scheduler-dark);
-  }
-
-  .bg-scheduler-light {
-    background-color: var(--scheduler-light);
-  }
-
-  .bg-success {
-    background-color: var(--scheduler-success);
-  }
-
-  .bg-warning {
-    background-color: var(--scheduler-warning);
-  }
-
-  .bg-danger {
-    background-color: var(--scheduler-danger);
-  }
-
-  .bg-info {
-    background-color: var(--scheduler-info);
-  }
-
-  /* Border-radius */
-  .rounded-lg {
-    border-radius: var(--radius);
-  }
-
-  .rounded-md {
-    border-radius: calc(var(--radius) - 2px);
-  }
-
-  .rounded-sm {
-    border-radius: calc(var(--radius) - 4px);
-  }
-
-  /* Keyframes */
-  @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-    to {
-      height: var(--radix-accordion-content-height);
-    }
-  }
-
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-    to {
-      height: 0;
-    }
-  }
-
-  @keyframes pulse-light {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.7;
-    }
-  }
-
-  /* Animations */
-  .animate-accordion-down {
-    animation: accordion-down 0.2s ease-out;
-  }
-
-  .animate-accordion-up {
-    animation: accordion-up 0.2s ease-out;
-  }
-
-  .animate-pulse-light {
-    animation: pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1)
-      infinite;
-  }
-}
+/* Components like hover cards and badges */
 @layer components {
-  /* Hoverable card */
   .card-hover {
-    @apply transition-all duration-200 hover:shadow-md hover:scale-[1.01] cursor-pointer;
+    @apply transition-all duration-200 hover:shadow-md hover:scale-105 cursor-pointer;
   }
 
-  /* Status Badges */
   .status-badge-approved {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
-    background-color: #d1fae5; /* Light green background */
-    color: #065f46; /* Dark green text */
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800;
   }
 
   .status-badge-pending {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
-    background-color: #fef9c3; /* Light yellow background */
-    color: #92400e; /* Dark yellow text */
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800;
   }
 
   .status-badge-rejected {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
-    background-color: #fee2e2; /* Light red background */
-    color: #991b1b; /* Dark red text */
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800;
   }
 
   .status-badge-emergency {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium animate-pulse;
-    background-color: #fee2e2; /* Light red background */
-    color: #991b1b; /* Dark red text */
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 animate-pulse;
   }
 }

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Shift } from '@/utils/mockData';
 import { Badge } from '@/components/ui/badge';
@@ -47,8 +46,8 @@ const MyShifts: React.FC<MyShiftsProps> = ({ shifts, onRequestSwap }) => {
   
   if (shifts.length === 0) {
     return (
-      <div className="text-center p-6 bg-muted/30 rounded-lg">
-        <p className="text-muted-foreground">No shifts scheduled</p>
+      <div className="text-center p-6 bg-[#f2fdff] rounded-lg">
+        <p className="text-[#6f7d7f]">No shifts scheduled</p>
       </div>
     );
   }
@@ -57,7 +56,7 @@ const MyShifts: React.FC<MyShiftsProps> = ({ shifts, onRequestSwap }) => {
     <div className="space-y-4">
       {sortedDates.map(date => (
         <div key={date} className="space-y-2">
-          <h4 className="font-medium">{formatDate(date)}</h4>
+          <h4 className="font-medium text-[#001140]">{formatDate(date)}</h4>
           
           <div className="grid grid-cols-1 gap-2">
             {shiftsByDate[date].map(shift => (
@@ -65,12 +64,13 @@ const MyShifts: React.FC<MyShiftsProps> = ({ shifts, onRequestSwap }) => {
                 key={shift.id} 
                 isHoverable={!!onRequestSwap}
                 onClick={() => onRequestSwap && onRequestSwap(shift)}
+                className="border border-[#261e67] hover:bg-[#e6f2f9]"
               >
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center">
-                      <span className="font-medium">{shift.startTime} - {shift.endTime}</span>
-                      <Badge className="ml-2 bg-gray-200 text-gray-800">{shift.position}</Badge>
+                      <span className="font-medium text-[#001140]">{shift.startTime} - {shift.endTime}</span>
+                      <Badge className="ml-2 bg-[#f2fdff] text-[#001140] border border-[#261e67]">{shift.position}</Badge>
                     </div>
                   </div>
                   <div>{getStatusBadge(shift.status)}</div>

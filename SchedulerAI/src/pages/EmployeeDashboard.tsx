@@ -4,9 +4,9 @@ import { useAuth } from "../context/AuthContext";
 import {
   fetchShifts,
   fetchLeaves,
-  fetchEmployees,
-  getShiftsByEmployeeId,
-  getLeavesByEmployeeId,
+  fetchUsers,
+  getShiftsByUserId,
+  getLeavesByUserId,
 } from "../utils/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CustomCard from "@/components/ui/CustomCard";
@@ -39,13 +39,13 @@ const EmployeeDashboard: React.FC = () => {
     setIsLoading(true);
     try {
       const [fetchedShifts, fetchedLeaves, fetchedEmployees] =
-        await Promise.all([fetchShifts(), fetchLeaves(), fetchEmployees()]);
+        await Promise.all([fetchShifts(), fetchLeaves(), fetchUsers()]);
 
       setAllShifts(fetchedShifts);
       setEmployees(fetchedEmployees);
 
-      setMyShifts(getShiftsByEmployeeId(user.id));
-      setMyLeaves(getLeavesByEmployeeId(user.id));
+      setMyShifts(getShiftsByUserId(Number(user.id)));
+      setMyLeaves(getLeavesByUserId(Number(user.id)));
     } catch (error) {
       console.error("Failed to fetch employee data:", error);
       toast.error("Failed to load your schedule data");
@@ -95,9 +95,9 @@ const EmployeeDashboard: React.FC = () => {
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Employee Dashboard</h1>
+        <h1 className="text-2xl font-bold text-[#001140]">Employee Dashboard</h1>
         <div className="flex items-center">
-          <span className="mr-2">Welcome, {user?.name}</span>
+          <span className="mr-2 text-[#001140]">Welcome, {user?.name}</span>
         </div>
       </div>
 
@@ -111,7 +111,7 @@ const EmployeeDashboard: React.FC = () => {
 
             <TabsContent value="my-schedule" className="space-y-4">
               <div className="flex justify-between items-center">
-                <h2 className="font-semibold text-lg">Upcoming Shifts</h2>
+                <h2 className="font-semibold text-lg text-[#001140]">Upcoming Shifts</h2>
                 <div className="flex space-x-2">
                   <CustomButton
                     variant={viewMode === "list" ? "primary" : "outline"}
@@ -132,7 +132,7 @@ const EmployeeDashboard: React.FC = () => {
 
               {isLoading ? (
                 <div className="flex justify-center p-8">
-                  <div className="w-8 h-8 border-4 border-t-scheduler-primary rounded-full animate-spin"></div>
+                  <div className="w-8 h-8 border-4 border-t-[#261e67] rounded-full animate-spin"></div>
                 </div>
               ) : viewMode === "list" ? (
                 <MyShifts
@@ -153,7 +153,7 @@ const EmployeeDashboard: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="swap-requests" className="space-y-4">
-              <h2 className="font-semibold text-lg">Swap Requests</h2>
+              <h2 className="font-semibold text-lg text-[#001140]">Swap Requests</h2>
 
               {swapRequests.length > 0 ? (
                 <div className="space-y-3">
@@ -161,12 +161,12 @@ const EmployeeDashboard: React.FC = () => {
                     <CustomCard key={request.id}>
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="font-medium">Swap Request</p>
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="font-medium text-[#001140]">Swap Request</p>
+                          <p className="text-sm text-[#6f7d7f] mt-1">
                             {request.reason}
                           </p>
                         </div>
-                        <Badge className="bg-yellow-600">
+                        <Badge className="bg-[#001140] text-[#f2fdff]">
                           {request.status}
                         </Badge>
                       </div>
@@ -174,8 +174,8 @@ const EmployeeDashboard: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-muted/30 rounded-lg">
-                  <p className="text-muted-foreground">
+                <div className="text-center py-8 bg-[#f2fdff] rounded-lg">
+                  <p className="text-[#6f7d7f]">
                     You don't have any active swap requests
                   </p>
                 </div>
@@ -186,12 +186,12 @@ const EmployeeDashboard: React.FC = () => {
 
         <div className="space-y-4">
           <CustomCard>
-            <h2 className="font-semibold text-lg mb-4">Request Leave</h2>
+            <h2 className="font-semibold text-lg text-[#001140] mb-4">Request Leave</h2>
             <LeaveRequestForm />
           </CustomCard>
 
           <CustomCard>
-            <h2 className="font-semibold text-lg mb-4">Emergency Options</h2>
+            <h2 className="font-semibold text-lg text-[#001140] mb-4">Emergency Options</h2>
             <EmergencyLeave
               employeeId={user?.id || ""}
               shifts={allShifts}
@@ -200,48 +200,6 @@ const EmployeeDashboard: React.FC = () => {
             />
           </CustomCard>
         </div>
-      </div>
-
-      <div className="border rounded-lg bg-white p-4 shadow-sm">
-        <h2 className="font-semibold text-lg mb-4">My Leave History</h2>
-
-        {myLeaves.length === 0 ? (
-          <div className="text-center py-8 bg-muted/30 rounded-lg">
-            <p className="text-muted-foreground">
-              You haven't submitted any leave requests yet
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {myLeaves.map((leave) => (
-              <div key={leave.id} className="border rounded-lg p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <span className="font-medium">{leave.type} Leave</span>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {new Date(leave.start_date).toLocaleDateString()} -{" "}
-                      {new Date(leave.end_date).toLocaleDateString()}
-                    </p>
-                    <p className="text-sm mt-2">{leave.reason}</p>
-                  </div>
-                  <div>
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        leave.status === "Approved"
-                          ? "bg-green-100 text-green-800"
-                          : leave.status === "Rejected"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {leave.status}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Shift Swap Modal */}

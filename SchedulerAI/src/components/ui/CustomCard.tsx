@@ -1,5 +1,12 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface CustomCardProps {
@@ -19,13 +26,14 @@ const CustomCard: React.FC<CustomCardProps> = ({
   children,
   footer,
   isHoverable = false,
-  onClick
+  onClick,
 }) => {
   return (
-    <Card 
+    <Card
       className={cn(
-        "bg-[#f2fdff] border-[#261e67]",
-        isHoverable && "transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-[#001140]",
+        "bg-background border-primary",
+        isHoverable &&
+          "transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-[#001140]",
         onClick && "cursor-pointer",
         className
       )}
@@ -33,8 +41,16 @@ const CustomCard: React.FC<CustomCardProps> = ({
     >
       {(title || description) && (
         <CardHeader>
-          {title && <CardTitle className="text-[#001140]">{title}</CardTitle>}
-          {description && <CardDescription className="text-[#6f7d7f]">{description}</CardDescription>}
+          {title && (
+            <CardTitle className="text-foreground">
+              {title}
+            </CardTitle>
+          )}
+          {description && (
+            <CardDescription className="text-shade">
+              {description}
+            </CardDescription>
+          )}
         </CardHeader>
       )}
       <CardContent>{children}</CardContent>

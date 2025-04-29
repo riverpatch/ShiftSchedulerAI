@@ -1,14 +1,17 @@
-import React from 'react';
-import { Shift } from '@/utils/mockData';
-import { Badge } from '@/components/ui/badge';
-import CustomCard from '@/components/ui/CustomCard';
+import React from "react";
+import { Shift } from "@/utils/mockData";
+import { Badge } from "@/components/ui/badge";
+import CustomCard from "@/components/ui/CustomCard";
 
 interface MyShiftsProps {
   shifts: Shift[];
   onRequestSwap?: (shift: Shift) => void;
 }
 
-const MyShifts: React.FC<MyShiftsProps> = ({ shifts, onRequestSwap }) => {
+const MyShifts: React.FC<MyShiftsProps> = ({
+  shifts,
+  onRequestSwap,
+}) => {
   // Group shifts by date
   const shiftsByDate = shifts.reduce((acc, shift) => {
     const date = shift.date;
@@ -22,55 +25,82 @@ const MyShifts: React.FC<MyShiftsProps> = ({ shifts, onRequestSwap }) => {
   // Format date for display
   const formatDate = (dateStr: string): string => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
   };
-  
+
   // Status badge colors
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Completed':
-        return <Badge className="bg-green-600">Completed</Badge>;
-      case 'In Progress':
-        return <Badge className="bg-blue-600">In Progress</Badge>;
-      case 'Scheduled':
-        return <Badge className="bg-scheduler-primary">Scheduled</Badge>;
+      case "Completed":
+        return (
+          <Badge className="bg-green-600">Completed</Badge>
+        );
+      case "In Progress":
+        return (
+          <Badge className="bg-blue-600">In Progress</Badge>
+        );
+      case "Scheduled":
+        return (
+          <Badge className="bg-scheduler-primary">
+            Scheduled
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
   // Sort dates
-  const sortedDates = Object.keys(shiftsByDate).sort((a, b) => {
-    return new Date(a).getTime() - new Date(b).getTime();
-  });
-  
+  const sortedDates = Object.keys(shiftsByDate).sort(
+    (a, b) => {
+      return new Date(a).getTime() - new Date(b).getTime();
+    }
+  );
+
   if (shifts.length === 0) {
     return (
       <div className="text-center p-6 bg-[#f2fdff] rounded-lg">
-        <p className="text-[#6f7d7f]">No shifts scheduled</p>
+        <p className="text-[#6f7d7f]">
+          No shifts scheduled
+        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {sortedDates.map(date => (
-        <div key={date} className="space-y-2">
-          <h4 className="font-medium text-[#001140]">{formatDate(date)}</h4>
-          
+      {sortedDates.map((date) => (
+        <div
+          key={date}
+          className="space-y-2"
+        >
+          <h4 className="font-medium text-[#001140]">
+            {formatDate(date)}
+          </h4>
+
           <div className="grid grid-cols-1 gap-2">
-            {shiftsByDate[date].map(shift => (
-              <CustomCard 
-                key={shift.id} 
+            {shiftsByDate[date].map((shift) => (
+              <CustomCard
+                key={shift.id}
                 isHoverable={!!onRequestSwap}
-                onClick={() => onRequestSwap && onRequestSwap(shift)}
-                className="border border-[#261e67] hover:bg-[#e6f2f9]"
+                onClick={() =>
+                  onRequestSwap && onRequestSwap(shift)
+                }
+                className="border border-primary hover:bg-[#e6f2f9]"
               >
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center">
-                      <span className="font-medium text-[#001140]">{shift.startTime} - {shift.endTime}</span>
-                      <Badge className="ml-2 bg-[#f2fdff] text-[#001140] border border-[#261e67]">{shift.position}</Badge>
+                      <span className="font-medium text-[#001140]">
+                        {shift.startTime} - {shift.endTime}
+                      </span>
+                      <Badge className="ml-2 bg-[#f2fdff] text-[#001140] border border-primary">
+                        {shift.position}
+                      </Badge>
                     </div>
                   </div>
                   <div>{getStatusBadge(shift.status)}</div>

@@ -12,14 +12,36 @@
    --input: #1e2850;
    --ring: #ef476f; */
 
-  --color-background: #f2fdff;
-  --color-dark-background: #001140;
+  --color-background: #f7feff;
   --color-foreground: #001140;
-  --color-dark-foreground: #f2fdff;
+  --color-dark-background: #001140;
+  --color-dark-foreground: #f7feff;
+  --color-shade: #6f7d7f;
 
   --color-border: #cbd5e1;
   --color-input: #e2e8f0;
   --color-ring: #ef476f;
+
+  /* Scheduler Palette */
+  --color-scheduler-primary: #001140;
+  --color-scheduler-secondary: #6f7d7f;
+  --color-scheduler-tertiary: #261e67;
+  --color-scheduler-dark: #0a0a23;
+  --color-scheduler-light: #e6f2f9;
+  --color-scheduler-success: #22c55e;
+  --color-scheduler-warning: #f97316;
+  --color-scheduler-danger: #ef4444;
+  --color-scheduler-info: #0ea5e9;
+
+  /* Sidebar */
+  --color-sidebar: #f1f5f9; /* Potentially sidebar-background */
+  --color-sidebar-foreground: #001140;
+  --color-sidebar-primary: #261e67;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: #e6f2f9;
+  --color-sidebar-accent-foreground: #0a0a23;
+  --color-sidebar-border: #cbd5e1;
+  --color-sidebar-ring: #ef476f;
 
   /* Semantic Colors */
   --color-primary: #261e67;
@@ -43,27 +65,6 @@
 
   --color-card: #ffffff;
   --color-card-foreground: #0a0a23;
-
-  /* Sidebar */
-  --color-sidebar: #f1f5f9; /* Potentially sidebar-background */
-  --color-sidebar-foreground: #0a0a23;
-  --color-sidebar-primary: #261e67;
-  --color-sidebar-primary-foreground: #ffffff;
-  --color-sidebar-accent: #e6f2f9;
-  --color-sidebar-accent-foreground: #0a0a23;
-  --color-sidebar-border: #cbd5e1;
-  --color-sidebar-ring: #ef476f;
-
-  /* Scheduler Palette */
-  --color-scheduler-primary: #001140;
-  --color-scheduler-secondary: #6f7d7f;
-  --color-scheduler-tertiary: #261e67;
-  --color-scheduler-dark: #0a0a23;
-  --color-scheduler-light: #e6f2f9;
-  --color-scheduler-success: #22c55e;
-  --color-scheduler-warning: #f97316;
-  --color-scheduler-danger: #ef4444;
-  --color-scheduler-info: #0ea5e9;
 
   /* Border radius */
   --radius: 0.5rem;
@@ -103,19 +104,23 @@
   }
 }
 
-
 /* Custom base layer */
 @layer base {
   body {
-    font-family: 'Rubik', sans-serif;
+    font-family: "Rubik", sans-serif;
     @apply bg-[#f2fdff] text-[#001140];
     margin: 0;
     padding: 0;
     overflow-x: hidden;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Montserrat', sans-serif;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Montserrat", sans-serif;
   }
 
   html {
@@ -139,8 +144,6 @@
 }
 
 /* Components like hover cards and badges */
-
-
 
 @layer utilities {
   /* Container */

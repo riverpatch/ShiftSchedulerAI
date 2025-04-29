@@ -1,65 +1,78 @@
-import { supabase } from '@/integrations/supabase/client';
-import type { TypedSupabaseClient } from '@/types/supabase';
+import { supabase } from '@/lib/supabase/client';
+import type { Database, UserRole, UserStatus } from '@/lib/supabase/client';
+import bcryptjs from 'bcryptjs';
 
 // Auth types
 export type AuthUser = {
-  id: string;
-  email: string;
-  name: string;
-  role: 'Owner' | 'Employee';
-};
-
-type UserRow = {
   user_id: number;
   email: string;
   name: string;
-  role: string;
-  password_hash: string;
-};
-
-type SupabaseResponse<T> = {
-  data: T | null;
-  error: { message: string; details: string; hint: string } | null;
+  role: UserRole;
+  priority_level: number | null;
+  status: UserStatus;
 };
 
 // Login function using Supabase
-export const login = async (email: string, password: string, role: 'Owner' | 'Employee'): Promise<AuthUser> => {
+export const login = async (email: string, password: string, role: UserRole): Promise<AuthUser> => {
   try {
-    // First, check if the user exists with the given email
-    const { data, error } = await supabase
-      .from('users')
-      .select('user_id, email, name, role, password_hash')
-      .eq('email', email)
-      .single() as { data: UserRow | null; error: any };
+    console.log('Attempting login with:', { email, role });
 
-    if (error || !data) {
+    type UserRow = Database['public']['Tables']['users']['Row'];
+
+    // Check if the user exists with the given email and role
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .eq('role', role)
+      .single<UserRow>();
+
+    if (userError) {
+      console.error('Database error:', userError);
+      throw new Error('Database error occurred');
+    }
+
+    if (!userData) {
+      console.error('No user found with email and role:', { email, role });
       throw new Error('Invalid credentials');
     }
 
-    // Check if the role matches (case-insensitive)
-    if (data.role.toLowerCase() !== role.toLowerCase()) {
-      throw new Error('Invalid role');
+    // Check if the user is active
+    if (userData.status !== 'active') {
+      console.error('User account inactive:', userData.status);
+      throw new Error('Account is inactive');
     }
 
-    // Check if the password hash matches
-    if (data.password_hash !== `hash_${password}`) {
+    // Verify password using bcryptjs
+    const isValidPassword = await bcryptjs.compare(password, userData.password_hash);
+    if (!isValidPassword) {
+      console.error('Password mismatch');
       throw new Error('Invalid credentials');
     }
 
     const authUser: AuthUser = {
-      id: String(data.user_id),
-      email: data.email,
-      name: data.name,
-      role: data.role as 'Owner' | 'Employee'
+      user_id: userData.user_id,
+      email: userData.email,
+      name: userData.name,
+      role: userData.role,
+      priority_level: userData.priority_level,
+      status: userData.status
     };
 
     // Store in localStorage for persistence
     localStorage.setItem('authUser', JSON.stringify(authUser));
+    console.log('Login successful:', { ...authUser });
     return authUser;
   } catch (error) {
     console.error('Login error:', error);
-    throw new Error('Invalid credentials');
+    throw error instanceof Error ? error : new Error('Login failed');
   }
+};
+
+// Helper function to hash passwords (for user creation/registration)
+export const hashPassword = async (password: string): Promise<string> => {
+  const saltRounds = 12;
+  return await bcryptjs.hash(password, saltRounds);
 };
 
 // Check if user is authenticated

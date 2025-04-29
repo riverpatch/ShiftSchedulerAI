@@ -1,23 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
-import {
-  fetchShifts,
-  fetchLeaves,
-  fetchUsers,
-  getShiftsByUserId,
-  getLeavesByUserId,
-} from "../utils/mockData";
+import { supabase } from "@/lib/supabase/client";
+import type { Database } from "@/lib/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CustomCard from "@/components/ui/CustomCard";
 import MyShifts from "../components/dashboard/MyShifts";
 import LeaveRequestForm from "../components/dashboard/LeaveRequestForm";
 import EmergencyLeave from "../components/dashboard/EmergencyLeave";
-import { User, Shift, Leave } from "@/utils/mockData";
 import ShiftCalendar from "@/components/dashboard/ShiftCalendar";
 import ShiftSwapModal from "@/components/dashboard/ShiftSwapModal";
 import CustomButton from "@/components/ui/CustomButton";
 import Badge from "@/components/ui/badge";
+import { PostgrestSingleResponse } from '@supabase/supabase-js';
+
+type Tables = Database['public']['Tables'];
+type User = Tables['users']['Row'];
+type Shift = Tables['shift_schedule']['Row'];
+type Leave = Tables['leave_requests']['Row'];
+type ShiftSwapRequest = Tables['shift_swap_requests']['Row'];
+
 const EmployeeDashboard: React.FC = () => {
   const { user } = useAuth();
   const [myShifts, setMyShifts] = useState<Shift[]>([]);
@@ -26,7 +28,7 @@ const EmployeeDashboard: React.FC = () => {
   const [allShifts, setAllShifts] = useState<Shift[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
-  const [swapRequests, setSwapRequests] = useState<any[]>([]);
+  const [swapRequests, setSwapRequests] = useState<ShiftSwapRequest[]>([]);
 
   // State for shift swap modal
   const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
@@ -38,14 +40,45 @@ const EmployeeDashboard: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const [fetchedShifts, fetchedLeaves, fetchedEmployees] =
-        await Promise.all([fetchShifts(), fetchLeaves(), fetchUsers()]);
+      type ShiftRow = Database['public']['Tables']['shift_schedule']['Row'];
+      type LeaveRow = Database['public']['Tables']['leave_requests']['Row'];
+      type UserRow = Database['public']['Tables']['users']['Row'];
 
-      setAllShifts(fetchedShifts);
-      setEmployees(fetchedEmployees);
+      const [shiftsResult, leavesResult, employeesResult]: [
+        PostgrestSingleResponse<ShiftRow[]>,
+        PostgrestSingleResponse<LeaveRow[]>,
+        PostgrestSingleResponse<UserRow[]>
+      ] = await Promise.all([
+        supabase
+          .from('shift_schedule')
+          .select('*')
+          .returns<ShiftRow[]>(),
+        supabase
+          .from('leave_requests')
+          .select('*')
+          .returns<LeaveRow[]>(),
+        supabase
+          .from('users')
+          .select('*')
+          .returns<UserRow[]>()
+      ]);
 
-      setMyShifts(getShiftsByUserId(Number(user.id)));
-      setMyLeaves(getLeavesByUserId(Number(user.id)));
+      // Handle any errors
+      if (shiftsResult.error) throw shiftsResult.error;
+      if (leavesResult.error) throw leavesResult.error;
+      if (employeesResult.error) throw employeesResult.error;
+
+      // Set the data with proper null checks
+      const shifts = shiftsResult.data ?? [];
+      const leaves = leavesResult.data ?? [];
+      const employees = employeesResult.data ?? [];
+
+      setAllShifts(shifts);
+      setEmployees(employees);
+
+      // Filter data for current user
+      setMyShifts(shifts.filter(shift => shift.user_id === user.user_id));
+      setMyLeaves(leaves.filter(leave => leave.user_id === user.user_id));
     } catch (error) {
       console.error("Failed to fetch employee data:", error);
       toast.error("Failed to load your schedule data");
@@ -64,26 +97,30 @@ const EmployeeDashboard: React.FC = () => {
     setIsSwapModalOpen(true);
   };
 
-  const handleSwapRequestSubmit = (
+  const handleSwapRequestSubmit = async (
     shiftId: string,
     targetEmployeeId: string,
     reason: string
   ) => {
-    // Create a new swap request
-    const newSwapRequest = {
-      id: `swap-${Date.now()}`,
-      shiftId,
-      requestorId: user?.id,
-      targetEmployeeId,
-      reason,
-      status: "Pending",
-      createdAt: new Date().toISOString(),
-    };
+    try {
+      const { error } = await supabase
+        .from('shift_swap_requests')
+        .insert({
+          shift_id: Number(shiftId),
+          requester_user_id: user?.user_id,
+          requested_user_id: Number(targetEmployeeId),
+          swap_reason: reason,
+          status: 'pending',
+          ai_suggested: false
+        });
 
-    // Add to swap requests
-    setSwapRequests((prev) => [...prev, newSwapRequest]);
-
-    toast.success("Swap request sent successfully");
+      if (error) throw error;
+      toast.success("Swap request sent successfully");
+      fetchEmployeeData();
+    } catch (error) {
+      console.error('Failed to submit swap request:', error);
+      toast.error("Failed to send swap request");
+    }
   };
 
   useEffect(() => {
@@ -158,12 +195,12 @@ const EmployeeDashboard: React.FC = () => {
               {swapRequests.length > 0 ? (
                 <div className="space-y-3">
                   {swapRequests.map((request) => (
-                    <CustomCard key={request.id}>
+                    <CustomCard key={request.swap_id}>
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="font-medium text-[#001140]">Swap Request</p>
                           <p className="text-sm text-[#6f7d7f] mt-1">
-                            {request.reason}
+                            {request.swap_reason}
                           </p>
                         </div>
                         <Badge className="bg-[#001140] text-[#f2fdff]">
@@ -193,7 +230,7 @@ const EmployeeDashboard: React.FC = () => {
           <CustomCard>
             <h2 className="font-semibold text-lg text-[#001140] mb-4">Emergency Options</h2>
             <EmergencyLeave
-              employeeId={user?.id || ""}
+              employeeId={String(user?.user_id || 0)}
               shifts={allShifts}
               employees={employees}
               onEmergencyLeaveSubmit={handleEmergencyLeaveSubmit}
@@ -208,7 +245,7 @@ const EmployeeDashboard: React.FC = () => {
         onClose={() => setIsSwapModalOpen(false)}
         shift={selectedShiftForSwap}
         employees={employees}
-        currentUserId={user?.id || ""}
+        currentUserId={String(user?.user_id || 0)}
         onSwapRequest={handleSwapRequestSubmit}
       />
     </div>

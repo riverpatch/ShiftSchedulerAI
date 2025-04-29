@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Brain } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, SupabaseError } from '@/lib/supabase/client';
+import type { Database } from '@/lib/supabase/client';
 import OwnerMetricsCards from '../components/dashboard/OwnerMetricsCards';
 import LeaveRequestList from '../components/dashboard/LeaveRequestList';
 import ScheduleOverview from '../components/dashboard/ScheduleOverview';
@@ -10,8 +11,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import CustomButton from '@/components/ui/CustomButton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SupabaseTest } from '../components/test/SupabaseTest';
-import { SupabaseError } from '@/integrations/supabase/client';
 import { Leave } from '@/types/leave';
+
+interface CustomError {
+  message: string;
+  code?: string;
+  details?: any;
+}
 
 interface UserEmployee {
   user_id: number;

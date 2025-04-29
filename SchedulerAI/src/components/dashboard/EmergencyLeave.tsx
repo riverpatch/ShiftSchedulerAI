@@ -4,8 +4,11 @@ import { Textarea } from '@/components/ui/textarea';
 import CustomButton from '@/components/ui/CustomButton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'react-hot-toast';
-import { handleEmergencyLeave } from '@/utils/schedule';
-import { User, Shift } from '@/utils/mockData';
+import { supabase } from '@/lib/supabase/client';
+import type { Database } from '@/lib/supabase/client';
+
+type Shift = Database['public']['Tables']['shift_schedule']['Row'];
+type User = Database['public']['Tables']['users']['Row'];
 
 interface EmergencyLeaveProps {
   employeeId: string;
@@ -33,7 +36,7 @@ const EmergencyLeave: React.FC<EmergencyLeaveProps> = ({
     setIsSubmitting(true);
     
     try {
-      // Assuming today's date for emergency leave
+      // Get today's date in YYYY-MM-DD format
       const today = new Date().toISOString().split('T')[0];
       
       // Check if employee has shifts today
@@ -46,16 +49,34 @@ const EmergencyLeave: React.FC<EmergencyLeaveProps> = ({
         setIsDialogOpen(false);
         return;
       }
-      
-      // Process emergency leave
-      const result = await handleEmergencyLeave(employeeId, today, shifts, employees);
-      
-      // Show success with replacement info if available
-      if (result.suggestedReplacement) {
-        toast.success(`Emergency leave processed. ${result.suggestedReplacement.name} has been suggested as replacement.`);
-      } else {
-        toast.success('Emergency leave processed. No replacement found.');
+
+      // Create emergency leave request
+      const { error: leaveError } = await supabase
+        .from('leave_requests')
+        .insert({
+          user_id: Number(employeeId),
+          leave_type: 'emergency',
+          start_datetime: `${today}T00:00:00`,
+          end_datetime: `${today}T23:59:59`,
+          reason: reason,
+          status: 'pending'
+        });
+
+      if (leaveError) {
+        throw leaveError;
       }
+
+      // Update shift status to unassigned
+      const { error: shiftError } = await supabase
+        .from('shift_schedule')
+        .update({ shift_status: 'unassigned' })
+        .in('shift_id', todayShifts.map(shift => shift.shift_id));
+
+      if (shiftError) {
+        throw shiftError;
+      }
+      
+      toast.success('Emergency leave request submitted successfully');
       
       // Close dialog and trigger refresh
       setIsDialogOpen(false);
@@ -64,8 +85,8 @@ const EmergencyLeave: React.FC<EmergencyLeaveProps> = ({
       // Reset form
       setReason('');
     } catch (error) {
-      toast.error('Failed to process emergency leave');
-      console.error(error);
+      console.error('Failed to process emergency leave:', error);
+      toast.error('Failed to process emergency leave request');
     } finally {
       setIsSubmitting(false);
     }
@@ -101,32 +122,33 @@ const EmergencyLeave: React.FC<EmergencyLeaveProps> = ({
           </div>
           
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[#001140]">Reason</label>
+            <label htmlFor="reason" className="text-sm font-medium text-[#001140]">
+              Reason for Emergency Leave
+            </label>
             <Textarea
+              id="reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Please explain your emergency situation"
-              className="border border-[#261e67] bg-[#f2fdff] text-[#001140]"
+              placeholder="Please explain the nature of your emergency..."
+              className="min-h-[100px]"
             />
           </div>
         </div>
-
+        
         <DialogFooter>
           <CustomButton
             variant="outline"
             onClick={() => setIsDialogOpen(false)}
-            className="border border-[#261e67] text-[#001140] hover:bg-[#e6f2f9]"
             disabled={isSubmitting}
           >
             Cancel
           </CustomButton>
           <CustomButton
-            variant="primary"
+            variant="destructive"
             onClick={submitEmergencyLeave}
-            className="bg-[#001140] text-[#f2fdff] hover:bg-[#261e67]"
-            isLoading={isSubmitting}
+            disabled={isSubmitting}
           >
-            Submit Request
+            {isSubmitting ? 'Submitting...' : 'Submit Emergency Leave'}
           </CustomButton>
         </DialogFooter>
       </DialogContent>

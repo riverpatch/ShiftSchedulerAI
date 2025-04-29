@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import CustomButton from "@/components/ui/CustomButton";
 import { useAuth } from "../context/AuthContext";
+import DatabaseConnectionCheck from "@/components/DatabaseConnectionCheck";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -42,9 +43,15 @@ const Login = () => {
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === "Invalid role") {
-          toast.error("Invalid role selected");
-        } else {
+          toast.error("Invalid role selected for this account");
+        } else if (error.message === "Account is inactive") {
+          toast.error("Your account is inactive. Please contact support.");
+        } else if (error.message === "Invalid credentials") {
           toast.error("Invalid email or password");
+        } else if (error.message.includes("Database error")) {
+          toast.error("Database connection error. Please try again.");
+        } else {
+          toast.error(error.message);
         }
       } else {
         toast.error("Login failed. Please try again.");
@@ -55,38 +62,18 @@ const Login = () => {
     }
   };
 
-  const demoLogin = async (demoEmail: string, demoRole: "Owner" | "Employee") => {
-    setEmail(demoEmail);
-    setPassword(demoEmail.split('@')[0]); // Use the username part as password
+  const demoLogin = async (demoRole: "Owner" | "Employee") => {
     setRole(demoRole);
-
-    setTimeout(async () => {
-      setIsLoading(true);
-      try {
-        const user = await login(demoEmail, demoEmail.split('@')[0], demoRole);
-        toast.success("Logged in successfully!");
-        navigate(user.role === "Owner" ? "/owner/dashboard" : "/employee/dashboard");
-      } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error("Demo login failed");
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    }, 300);
+    setEmail("");
+    setPassword("");
+    toast(`Please enter ${demoRole.toLowerCase()} credentials to log in`, {
+      duration: 3000,
+      icon: 'ℹ️'
+    });
   };
 
   return (
-
-    <div
-      className="
-        min-h-dvh flex flex-col items-center justify-center
-        bg-dark-background
-        p-4 sm:p-6
-      "
-    >
+    <div className="min-h-dvh flex flex-col items-center justify-center bg-dark-background p-4 sm:p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-dark-foreground-color">
@@ -95,8 +82,9 @@ const Login = () => {
           <p className="text-muted-foreground mt-2">
             Log in to manage your schedules
           </p>
-
         </div>
+
+        <DatabaseConnectionCheck />
 
         <div className="bg-[#f2fdff] rounded-lg shadow-lg p-6 sm:p-8 border border-[#261e67]">
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -161,21 +149,21 @@ const Login = () => {
           </form>
 
           <div className="mt-6 border-t border-[#261e67] pt-4">
-            <p className="text-center text-sm text-[#6f7d7f] mb-4">Demo Access</p>
+            <p className="text-center text-sm text-[#6f7d7f] mb-4">Quick Role Selection</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <CustomButton
-                onClick={() => demoLogin("jane.doe@acme.com", "Owner")}
+                onClick={() => demoLogin("Owner")}
                 className="w-full bg-[#e6f2f9] text-[#001140] hover:bg-[#261e67] hover:text-[#f2fdff]"
                 disabled={isLoading}
               >
-                Login as Owner
+                Select Owner Role
               </CustomButton>
               <CustomButton
-                onClick={() => demoLogin("john.smith@acme.com", "Employee")}
+                onClick={() => demoLogin("Employee")}
                 className="w-full border border-[#261e67] text-[#001140] hover:bg-[#e6f2f9]"
                 disabled={isLoading}
               >
-                Login as Employee
+                Select Employee Role
               </CustomButton>
             </div>
           </div>

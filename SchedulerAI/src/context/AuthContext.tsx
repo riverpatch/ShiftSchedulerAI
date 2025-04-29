@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { AuthUser, getCurrentUser, login, logout } from '../utils/auth';
 
